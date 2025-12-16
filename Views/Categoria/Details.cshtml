@@ -1,0 +1,68 @@
+﻿@model ControlFinancieroProject.Models.Categoria
+@using ControlFinancieroProject.Models
+
+@{
+    ViewData["Title"] = "Detalles de categoría";
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">Categorías</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Detalles</li>
+    </ol>
+</nav>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+                <h2 class="card-title mb-1">@Model.Descripcion</h2>
+                <p class="text-muted mb-0">Id: <span class="fw-semibold">@Model.Id</span></p>
+            </div>
+
+            <div class="btn-group" role="group" aria-label="Acciones">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-primary d-inline-flex align-items-center">
+                    <i class="bi bi-pencil me-1" aria-hidden="true"></i><span class="d-none d-sm-inline">Editar</span>
+                </a>
+                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center">
+                    <i class="bi bi-trash me-1" aria-hidden="true"></i><span class="d-none d-sm-inline">Eliminar</span>
+                </a>
+                <a asp-action="Index" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
+                    <i class="bi bi-arrow-left me-1" aria-hidden="true"></i><span class="d-none d-sm-inline">Volver</span>
+                </a>
+            </div>
+        </div>
+
+        <hr />
+
+        <div class="row g-3">
+            <div class="col-sm-6">
+                <h6 class="text-uppercase text-muted small mb-2">Descripción</h6>
+                <p class="mb-0">@Model.Descripcion</p>
+            </div>
+
+            <div class="col-sm-3">
+                <h6 class="text-uppercase text-muted small mb-2">Tipo</h6>
+                @if (Model.Tipo == TipoCategoria.Ingreso)
+                {
+                    <span class="badge rounded-pill bg-success text-white d-inline-flex align-items-center"
+                          style="font-size:0.9rem; line-height:1; padding:0.35rem 0.7rem;">
+                        <i class="bi bi-arrow-up-short me-1" aria-hidden="true"></i> Ingreso
+                    </span>
+                }
+                else
+                {
+                    <span class="badge rounded-pill bg-danger text-white d-inline-flex align-items-center"
+                          style="font-size:0.9rem; line-height:1; padding:0.35rem 0.7rem;">
+                        <i class="bi bi-arrow-down-short me-1" aria-hidden="true"></i> Gasto
+                    </span>
+                }
+            </div>
+
+            <div class="col-sm-3">
+                <h6 class="text-uppercase text-muted small mb-2">Relación</h6>
+                <p class="mb-0 text-muted">Transacciones: <span class="fw-semibold">@(Model.Transacciones?.Count ?? 0)</span></p>
+            </div>
+        </div>
+    </div>
+</div>
