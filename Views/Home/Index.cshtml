@@ -1,8 +1,80 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Inicio - ControlFinanciero";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="py-5 text-dark">
+    <div class="container">
+        <div class="row align-items-center gy-4">
+            <div class="col-lg-7">
+                <h1 class="display-5 fw-bold">ControlFinanciero</h1>
+                <p class="lead text-muted">Gestiona tus categorías y transacciones de forma simple y segura. Visualiza, crea y administra tus registros financieros rápidamente.</p>
+
+                <div class="d-flex flex-wrap gap-2 mt-3">
+                    <a asp-controller="Categoria" asp-action="Index" class="btn btn-primary btn-lg d-inline-flex align-items-center">
+                        <i class="bi bi-tags me-2" aria-hidden="true"></i> Categorías
+                    </a>
+
+                    <a asp-controller="Transaccion" asp-action="Index" class="btn btn-outline-primary btn-lg d-inline-flex align-items-center">
+                        <i class="bi bi-list-check me-2" aria-hidden="true"></i> Transacciones
+                    </a>
+
+                    <a asp-controller="Categoria" asp-action="Create" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center align-self-center">
+                        <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Nueva categoría
+                    </a>
+                </div>
+
+                <p class="text-muted small mt-3 mb-0">Consejo: usa la barra de búsqueda en las pantallas de listado para encontrar rápidamente registros.</p>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3 display-6 text-primary"><i class="bi bi-tags"></i></div>
+                                    <div>
+                                        <h6 class="mb-0">Categorías</h6>
+                                        <small class="text-muted">Administrar tipos</small>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <a asp-controller="Categoria" asp-action="Index" class="stretched-link text-decoration-none">Ver todas →</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-6">
+                        <div class="card shadow-sm h-100">
+                            <div class="card-body">
+                                <div class="d-flex align-items-center">
+                                    <div class="me-3 display-6 text-success"><i class="bi bi-list-check"></i></div>
+                                    <div>
+                                        <h6 class="mb-0">Transacciones</h6>
+                                        <small class="text-muted">Ingresos y gastos</small>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <a asp-controller="Transaccion" asp-action="Index" class="stretched-link text-decoration-none">Ver todas →</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12">
+                        <div class="card border-0 bg-light small">
+                            <div class="card-body">
+                                <strong>Atajos rápidos</strong>
+                                <ul class="mb-0">
+                                    <li>Crear una nueva categoría: <a asp-controller="Categoria" asp-action="Create">Nueva categoría</a></li>
+                                    <li>Revisar transacciones recientes: <a asp-controller="Transaccion" asp-action="Index">Transacciones</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div><!-- row -->
+    </div><!-- container -->
 </div>
