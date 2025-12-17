@@ -1,0 +1,306 @@
+@model ControlFinancieroProject.Models.ComparativeReportViewModel
+@using System.Text.Json
+@using ControlFinancieroProject.Models
+
+@{
+    ViewData["Title"] = "Comparativo";
+    // Totales netos: ingresos suman, gastos restan
+    var net1 = Model.TransaccionesMonth1?.Sum(t => (t.Categoria?.Tipo == TipoCategoria.Gasto) ? -t.Monto : t.Monto) ?? 0m;
+    var net2 = Model.TransaccionesMonth2?.Sum(t => (t.Categoria?.Tipo == TipoCategoria.Gasto) ? -t.Monto : t.Monto) ?? 0m;
+
+    var signClass1 = net1 >= 0 ? "bg-success" : "bg-danger";
+    var signText1 = net1 >= 0 ? "Positivo" : "Negativo";
+    var signClass2 = net2 >= 0 ? "bg-success" : "bg-danger";
+    var signText2 = net2 >= 0 ? "Positivo" : "Negativo";
+
+    var diff = net2 - net1;
+    var diffSign = diff >= 0 ? "text-success" : "text-danger";
+    var diffEntity = diff >= 0 ? "&uarr;" : "&darr;";
+
+    // Porcentaje relativo: dividir por el valor absoluto del primer mes.
+    // Si el primer mes es 0 mostramos "—" (evita porcentajes engañosos).
+    decimal? diffPct = null;
+    if (net1 != 0m)
+    {
+        diffPct = (diff / Math.Abs(net1)) * 100m;
+    }
+}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 mb-0">Comparativo</h1>
+    <form class="d-flex" method="get" asp-action="Comparative">
+        <input type="number" name="year1" value="@Model.Year1" min="2000" class="form-control form-control-sm me-1" style="width:90px" />
+        <input type="number" name="month1" value="@Model.Month1" min="1" max="12" class="form-control form-control-sm me-2" style="width:70px" />
+
+        <span class="mx-1 fw-semibold">vs</span>
+
+        <input type="number" name="year2" value="@Model.Year2" min="2000" class="form-control form-control-sm mx-2" style="width:90px" />
+        <input type="number" name="month2" value="@Model.Month2" min="1" max="12" class="form-control form-control-sm me-2" style="width:70px" />
+
+        <button class="btn btn-sm btn-primary me-2">Comparar</button>
+        <a class="btn btn-sm btn-outline-secondary" asp-action="Comparative" title="Restablecer">Reset</a>
+    </form>
+</div>
+
+<!-- Top summary -->
+<div class="row g-3 mb-3">
+    <div class="col-12 col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="small text-muted">Total neto @Model.Month1/@Model.Year1</div>
+                <div class="d-flex align-items-center">
+                    <div class="h5 mb-1">@net1.ToString("N2")</div>
+                    <span class="badge @signClass1 ms-3">@signText1</span>
+                </div>
+                <div class="small text-muted">Transacciones: @Model.TransaccionesMonth1.Count()</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="small text-muted">Total neto @Model.Month2/@Model.Year2</div>
+                <div class="d-flex align-items-center">
+                    <div class="h5 mb-1">@net2.ToString("N2")</div>
+                    <span class="badge @signClass2 ms-3">@signText2</span>
+                </div>
+                <div class="small text-muted">Transacciones: @Model.TransaccionesMonth2.Count()</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-md-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="small text-muted">Diferencia</div>
+                <div class="h5 mb-1 @diffSign">@Html.Raw(diffEntity) @diff.ToString("N2")</div>
+                <div class="small text-muted">
+                    @(diffPct.HasValue ? $"{Math.Round(diffPct.Value, 1)}% respecto al primer mes" : "—")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-12 col-lg-8">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h6 class="card-title mb-0">Comparativo por categoría</h6>
+                    <div class="d-flex gap-2 align-items-center">
+                        <label class="small text-muted mb-0">Top</label>
+                        <select id="topN" class="form-select form-select-sm" style="width:80px">
+                            <option value="5">5</option>
+                            <option value="10" selected>10</option>
+                            <option value="20">20</option>
+                            <option value="100">Todos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="min-height:320px;">
+                    <canvas id="barCompare" style="width:100%;height:320px;"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h6 class="card-title mb-3">Detalles por categoría (fila por categoría)</h6>
+                <div class="table-responsive" style="max-height:340px; overflow:auto;">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead class="small text-muted">
+                            <tr>
+                                <th>Categoría</th>
+                                <th>Tipo</th>
+                                <th class="text-end">@Model.Month1/@Model.Year1</th>
+                                <th class="text-end">@Model.Month2/@Model.Year2</th>
+                            </tr>
+                        </thead>
+                        <tbody id="categoryTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h6 class="card-title">Transacciones resumen</h6>
+                <div class="small text-muted mb-2">Últimos movimientos — selecciona la pestaña</div>
+
+                <ul class="nav nav-tabs mb-2" id="transTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active py-1" id="tab-month1" data-bs-toggle="tab" data-bs-target="#pane-month1" type="button" role="tab" aria-controls="pane-month1" aria-selected="true">
+                            @Model.Month1/@Model.Year1
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link py-1" id="tab-month2" data-bs-toggle="tab" data-bs-target="#pane-month2" type="button" role="tab" aria-controls="pane-month2" aria-selected="false">
+                            @Model.Month2/@Model.Year2
+                        </button>
+                    </li>
+                </ul>
+
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="pane-month1" role="tabpanel" aria-labelledby="tab-month1">
+                        <div class="table-responsive" style="max-height:300px; overflow:auto">
+                            <table class="table table-sm mb-0">
+                                <thead class="small text-muted"><tr><th>Fecha</th><th>Desc</th><th>Tipo</th><th class="text-end">Monto</th></tr></thead>
+                                <tbody>
+                                    @foreach(var t in Model.TransaccionesMonth1.OrderByDescending(t => t.Fecha).ThenByDescending(t => t.Id).Take(10))
+                                    {
+                                        <tr>
+                                            <td class="small">@t.Fecha.ToString("yyyy-MM-dd")</td>
+                                            <td class="small text-truncate" style="max-width:160px">@t.Descripcion</td>
+                                            <td class="small">
+                                                @{
+                                                    var tipo = t.Categoria?.Tipo;
+                                                    if (tipo == TipoCategoria.Ingreso)
+                                                    {
+                                                        <span class="badge bg-success">Ingreso</span>;
+                                                    }
+                                                    else if (tipo == TipoCategoria.Gasto)
+                                                    {
+                                                        <span class="badge bg-danger">Gasto</span>;
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary">-</span>;
+                                                    }
+                                                }
+                                            </td>
+                                            <td class="text-end small">@t.Monto.ToString("N2")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="small text-muted mt-2">Últimas 10 transacciones del primer mes</div>
+                    </div>
+
+                    <div class="tab-pane fade" id="pane-month2" role="tabpanel" aria-labelledby="tab-month2">
+                        <div class="table-responsive" style="max-height:300px; overflow:auto">
+                            <table class="table table-sm mb-0">
+                                <thead class="small text-muted"><tr><th>Fecha</th><th>Desc</th><th>Tipo</th><th class="text-end">Monto</th></tr></thead>
+                                <tbody>
+                                    @foreach(var t in Model.TransaccionesMonth2.OrderByDescending(t => t.Fecha).ThenByDescending(t => t.Id).Take(10))
+                                    {
+                                        <tr>
+                                            <td class="small">@t.Fecha.ToString("yyyy-MM-dd")</td>
+                                            <td class="small text-truncate" style="max-width:160px">@t.Descripcion</td>
+                                            <td class="small">
+                                                @{
+                                                    var tipo = t.Categoria?.Tipo;
+                                                    if (tipo == TipoCategoria.Ingreso)
+                                                    {
+                                                        <span class="badge bg-success">Ingreso</span>;
+                                                    }
+                                                    else if (tipo == TipoCategoria.Gasto)
+                                                    {
+                                                        <span class="badge bg-danger">Gasto</span>;
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="badge bg-secondary">-</span>;
+                                                    }
+                                                }
+                                            </td>
+                                            <td class="text-end small">@t.Monto.ToString("N2")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="small text-muted mt-2">Últimas 10 transacciones del segundo mes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        (function () {
+            // Datos del servidor (categorías generales)
+            const labelsAll = @Html.Raw(JsonSerializer.Serialize(Model.CategoryLabels ?? new List<string>()));
+            const vals1All = @Html.Raw(JsonSerializer.Serialize(Model.ValuesMonth1 ?? new List<decimal>()));
+            const vals2All = @Html.Raw(JsonSerializer.Serialize(Model.ValuesMonth2 ?? new List<decimal>()));
+
+            // Listas por tipo para la tabla (Gasto / Ingreso)
+            const expenseCategoryList = @Html.Raw(JsonSerializer.Serialize(Model.ExpenseCategoryLabels ?? new List<string>()));
+            const incomeCategoryList = @Html.Raw(JsonSerializer.Serialize(Model.IncomeCategoryLabels ?? new List<string>()));
+
+            const labels = labelsAll || [];
+            const vals1 = (vals1All || []).map(v => Number(v) || 0);
+            const vals2 = (vals2All || []).map(v => Number(v) || 0);
+
+            const expenseSet = new Set((expenseCategoryList || []).map(s => String(s)));
+            const incomeSet = new Set((incomeCategoryList || []).map(s => String(s)));
+
+            const ctx = document.getElementById('barCompare').getContext('2d');
+            let barChart;
+
+            function fmt(v) { return v.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+
+            function buildChart(topN) {
+                // combinar y ordenar por la suma descendente para topN
+                const combined = labels.map((lab, i) => ({ lab, a: vals1[i] || 0, b: vals2[i] || 0, sum: (vals1[i] || 0) + (vals2[i] || 0) }))
+                    .sort((x,y) => y.sum - x.sum);
+
+                const slice = topN > 0 ? combined.slice(0, topN) : combined;
+                const labelsS = slice.map(s => s.lab);
+                const aS = slice.map(s => s.a);
+                const bS = slice.map(s => s.b);
+
+                // Poblar tabla: añadimos columna Tipo con texto y badge
+                const tbody = document.getElementById('categoryTableBody');
+                tbody.innerHTML = '';
+                slice.forEach(s => {
+                    const isExpense = expenseSet.has(s.lab);
+                    const isIncome = incomeSet.has(s.lab);
+                    let tipoText = '-';
+                    let tipoBadge = `<span class="d-inline-block me-2 rounded-circle" style="width:10px;height:10px;background:#6c757d;"></span>`;
+                    if (isExpense) { tipoText = 'Gasto'; tipoBadge = `<span class="d-inline-block me-2 rounded-circle" style="width:10px;height:10px;background:#dc3545;"></span>`; }
+                    else if (isIncome) { tipoText = 'Ingreso'; tipoBadge = `<span class="d-inline-block me-2 rounded-circle" style="width:10px;height:10px;background:#198754;"></span>`; }
+
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td class="small">${s.lab}</td><td class="small">${tipoBadge}${tipoText}</td><td class="text-end small">${fmt(s.a)}</td><td class="text-end small">${fmt(s.b)}</td>`;
+                    tbody.appendChild(tr);
+                });
+
+                const datasets = [
+                    { label: `${@Model.Month1}/${@Model.Year1}`, data: aS, backgroundColor: '#0d6efd' },
+                    { label: `${@Model.Month2}/${@Model.Year2}`, data: bS, backgroundColor: '#fd7e14' }
+                ];
+
+                if (barChart) {
+                    barChart.data.labels = labelsS;
+                    barChart.data.datasets = datasets;
+                    barChart.update();
+                } else {
+                    barChart = new Chart(ctx, {
+                        type: 'bar',
+                        data: { labels: labelsS, datasets: datasets },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: { y: { beginAtZero: true, ticks: { callback: v => fmt(Number(v) || 0) } } },
+                            plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${fmt(ctx.parsed.y)}` } } }
+                        }
+                    });
+                }
+            }
+
+            const topSelector = document.getElementById('topN');
+            topSelector.addEventListener('change', () => buildChart(Number(topSelector.value) || 0));
+
+            // Inicializar con TopN por defecto
+            buildChart(Number(topSelector.value) || 10);
+        })();
+    </script>
+}

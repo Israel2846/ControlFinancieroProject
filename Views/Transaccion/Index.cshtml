@@ -1,0 +1,200 @@
+@model IEnumerable<ControlFinancieroProject.Models.Transaccion>
+@using ControlFinancieroProject.Models
+@using System.Globalization
+
+@{
+    ViewData["Title"] = "Transacciones";
+
+    // Fecha seleccionada por querystring `date` (yyyy-MM-dd). Si no, tomamos la fecha de la primera transacción o hoy.
+    var dateQs = Context.Request.Query["date"].ToString();
+    DateTime selectedDate;
+    if (!DateTime.TryParseExact(dateQs, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out selectedDate))
+    {
+        selectedDate = Model?.Any() == true ? Model.First().Fecha.Date : DateTime.Today;
+    }
+
+    string selectedDateStr = selectedDate.ToString("yyyy-MM-dd");
+
+    // Resumen local del día mostrado
+    var ingresosDia = Model?.Where(t => t.Categoria?.Tipo == TipoCategoria.Ingreso).Sum(t => t.Monto) ?? 0m;
+    var gastosDia = Model?.Where(t => t.Categoria?.Tipo == TipoCategoria.Gasto).Sum(t => t.Monto) ?? 0m;
+    var netoDia = ingresosDia - gastosDia;
+    var countDia = Model?.Count() ?? 0;
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h4 text-dark mb-1">@ViewData["Title"]</h1>
+        <div class="small text-muted">Mostrando transacciones del día seleccionado</div>
+    </div>
+
+    <div class="d-flex align-items-center gap-3">
+        <div class="input-group input-group-sm me-2 shadow-sm rounded">
+            <button id="prevDayBtn" class="btn btn-outline-secondary" type="button" title="Día anterior">
+                <i class="bi bi-chevron-left"></i>
+            </button>
+            <input id="dateFilter" type="date" class="form-control form-control-sm border-0" value="@selectedDateStr" aria-label="Filtrar por fecha" />
+            <button id="nextDayBtn" class="btn btn-outline-secondary" type="button" title="Día siguiente">
+                <i class="bi bi-chevron-right"></i>
+            </button>
+        </div>
+
+        <div class="d-none d-sm-flex align-items-center gap-2">
+            <div class="text-end small text-muted">Transacciones</div>
+            <div class="badge bg-light text-dark border shadow-sm">@countDia</div>
+
+            <div class="text-end small text-muted">Ingresos</div>
+            <div class="badge bg-light text-success border shadow-sm">+@ingresosDia.ToString("N2")</div>
+
+            <div class="text-end small text-muted">Gastos</div>
+            <div class="badge bg-light text-danger border shadow-sm">-@gastosDia.ToString("N2")</div>
+
+            <div class="text-end small text-muted">Neto</div>
+            <div class="badge @(netoDia >= 0 ? "bg-primary text-white" : "bg-secondary text-white") shadow-sm">
+                @(netoDia >= 0 ? "+" : "-")@Math.Abs(netoDia).ToString("N2")
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="card border-0 shadow-sm">
+        <div class="card-body text-center text-muted py-5">
+            <i class="bi bi-journal-text fs-2 mb-2" aria-hidden="true"></i>
+            <div class="fw-semibold">No hay transacciones en esta fecha</div>
+            <div class="small mb-3">Selecciona otra fecha o crea tu primera transacción.</div>
+            <div>
+                <a asp-action="Create" class="btn btn-outline-primary btn-sm">Crear transacción</a>
+                <a asp-action="Index" class="btn btn-link btn-sm ms-2" title="Volver al día de hoy" onclick="document.getElementById('dateFilter').value = new Date().toISOString().slice(0,10);">Hoy</a>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div id="transactionsGrid" class="row g-3">
+        @foreach (var transaccion in Model)
+        {
+            var desc = (transaccion.Descripcion ?? string.Empty).Trim();
+            var titleText = string.IsNullOrWhiteSpace(desc) ? "-" : (desc.Length > 80 ? desc.Substring(0, 80) + "…" : desc);
+            var showFullDesc = !string.IsNullOrWhiteSpace(desc) && desc.Length > 80;
+            var tDate = transaccion.Fecha.ToString("yyyy-MM-dd");
+            var isIngreso = transaccion.Categoria?.Tipo == TipoCategoria.Ingreso;
+            var amountSign = isIngreso ? "+" : "-";
+            var amountClass = isIngreso ? "text-success" : "text-danger";
+            var badgeClass = isIngreso ? "border border-success text-success" : "border border-danger text-danger";
+        <div class="col-12 col-md-6 col-lg-4 tx-card" data-date="@tDate">
+            <div class="card h-100 shadow-sm border-0 hover-scale" style="transition: transform .12s ease;">
+                <div class="card-body d-flex flex-column">
+                    <div class="d-flex align-items-start justify-content-between mb-2">
+                        <div class="me-2" style="min-width:0;">
+                            <h5 class="card-title mb-1 text-truncate" style="max-width:220px">@titleText</h5>
+                            <div class="text-muted small">Fecha: @transaccion.Fecha.ToString("yyyy-MM-dd")</div>
+                        </div>
+
+                        <div class="text-end ms-2">
+                            <div class="fw-semibold fs-5 @amountClass">@amountSign@transaccion.Monto.ToString("N2")</div>
+                            @if (transaccion.Categoria != null)
+                            {
+                                <span class="badge rounded-pill @badgeClass" style="background-color: rgba(0,0,0,0.03);">
+                                    <i class="bi @(isIngreso ? "bi-arrow-up-short" : "bi-arrow-down-short") me-1"></i>
+                                    @(isIngreso ? "Ingreso" : "Gasto")
+                                </span>
+                            }
+                        </div>
+                    </div>
+
+                    @if (showFullDesc)
+                    {
+                        <p class="card-text text-muted small mb-3">@desc</p>
+                    }
+
+                    <ul class="list-unstyled small text-muted mb-3">
+                        <li><strong>Categoría:</strong> @(transaccion.Categoria?.Descripcion ?? "-")</li>
+                        <li><strong>Saldo anterior:</strong> @transaccion.SaldoAnterior.ToString("N2")</li>
+                        <li><strong>Saldo nuevo:</strong> @transaccion.SaldoNuevo.ToString("N2")</li>
+                    </ul>
+
+                    <div class="mt-auto d-flex gap-2">
+                        <a asp-action="Details" asp-route-id="@transaccion.Id" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
+                            <i class="bi bi-eye me-1"></i><span class="d-none d-sm-inline">Ver</span>
+                        </a>
+                        <a asp-action="Edit" asp-route-id="@transaccion.Id" class="btn btn-sm btn-outline-warning d-inline-flex align-items-center">
+                            <i class="bi bi-pencil me-1"></i><span class="d-none d-sm-inline">Editar</span>
+                        </a>
+                        <form asp-action="Delete" asp-route-id="@transaccion.Id" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center" onclick="return confirm('Eliminar transacción?');">
+                                <i class="bi bi-trash me-1"></i><span class="d-none d-sm-inline">Eliminar</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        }
+    </div>
+}
+
+<style>
+    /* Pequeña mejora visual local sin tocar archivos globales */
+    .hover-scale:hover { transform: translateY(-4px); box-shadow: 0 6px 18px rgba(0,0,0,0.06) !important; }
+</style>
+
+@section Scripts {
+    <script>
+        (function () {
+            const dateInput = document.getElementById('dateFilter');
+            const prevBtn = document.getElementById('prevDayBtn');
+            const nextBtn = document.getElementById('nextDayBtn');
+
+            function formatDate(d) {
+                const yyyy = d.getFullYear();
+                const mm = String(d.getMonth() + 1).padStart(2, '0');
+                const dd = String(d.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            }
+
+            function parseInputDate(s) {
+                if (!s) return new Date();
+                const parts = String(s).split('-');
+                if (parts.length !== 3) return new Date(s);
+                const y = Number(parts[0]);
+                const m = Number(parts[1]) - 1;
+                const d = Number(parts[2]);
+                if (Number.isNaN(y) || Number.isNaN(m) || Number.isNaN(d)) return new Date();
+                return new Date(y, m, d);
+            }
+
+            function navigateWithParams() {
+                const date = dateInput?.value;
+                const params = new URLSearchParams();
+                if (date) params.set('date', date);
+                window.location.href = `${window.location.pathname}?${params.toString()}`;
+            }
+
+            if (dateInput) {
+                dateInput.addEventListener('change', navigateWithParams);
+            }
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', function () {
+                    const d = parseInputDate(dateInput?.value);
+                    d.setDate(d.getDate() - 1);
+                    dateInput.value = formatDate(d);
+                    navigateWithParams();
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', function () {
+                    const d = parseInputDate(dateInput?.value);
+                    d.setDate(d.getDate() + 1);
+                    dateInput.value = formatDate(d);
+                    navigateWithParams();
+                });
+            }
+        })();
+    </script>
+}

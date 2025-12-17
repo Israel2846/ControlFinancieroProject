@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -26,7 +26,7 @@
                     </button>
 
                     <div class="collapse navbar-collapse" id="mainNavbar">
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0 align-items-lg-center">
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">
                                     <i class="bi bi-house-door me-1" aria-hidden="true"></i>
@@ -52,31 +52,36 @@
                                     <i class="bi bi-bar-chart-line me-1" aria-hidden="true"></i> Informes
                                 </a>
                                 <ul class="dropdown-menu" aria-labelledby="reportsDropdown">
-                                    <li><a class="dropdown-item" href="#">Resumen mensual</a></li>
-                                    <li><a class="dropdown-item" href="#">Comparativo</a></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Transaccion" asp-action="MonthlyReport">
+                                            Resumen mensual
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="Transaccion" asp-action="Comparative">
+                                            Comparativo
+                                        </a>
+                                    </li>
+                                    <li>
+                                       <form asp-controller="Transaccion" asp-action="RecalculateAll" method="post" class="d-inline">
+                                          @Html.AntiForgeryToken()
+                                          <button type="submit" class="dropdown-item" onclick="return confirm('Recalcular todos los saldos? Esta operación puede tardar.');">
+                                              Recalcular saldos
+                                          </button>
+                                      </form>
+                                    </li>
                                 </ul>
                             </li>
                         </ul>
 
-                        <!-- Search: full on lg+, compact icon on sm -->
-                        <form class="d-flex align-items-center me-2 d-none d-lg-flex" asp-controller="Transaccion" asp-action="Index" method="get" role="search">
-                            <input class="form-control form-control-sm me-2" type="search" name="q" placeholder="Buscar transacciones..." aria-label="Buscar" />
-                            <button class="btn btn-sm btn-outline-primary" type="submit" title="Buscar">
-                                <i class="bi bi-search" aria-hidden="true"></i>
-                            </button>
-                        </form>
-
                         <div class="d-flex align-items-center gap-2">
-                            <!-- compact create button: icon on xs, text on md+ -->
-                            <a class="btn btn-sm btn-primary d-inline-flex align-items-center" asp-controller="Transaccion" asp-action="Create" title="Nueva transacción">
-                                <i class="bi bi-plus-lg" aria-hidden="true"></i>
-                                <span class="ms-1 d-none d-md-inline">Nueva transacción</span>
+                            <!-- Acción principal: nueva transacción (siempre visible y prominente) -->
+                            <a class="btn btn-primary btn-sm d-inline-flex align-items-center" asp-controller="Transaccion" asp-action="Create" title="Nueva transacción">
+                                <i class="bi bi-plus-lg me-2" aria-hidden="true"></i>
+                                <span class="d-none d-md-inline">Nueva transacción</span>
                             </a>
 
-                            <!-- Search icon for small screens (opens search page) -->
-                            <a class="btn btn-sm btn-outline-secondary d-flex d-lg-none align-items-center" asp-controller="Transaccion" asp-action="Index" title="Buscar">
-                                <i class="bi bi-search" aria-hidden="true"></i>
-                            </a>
+                            <!-- Dropdown eliminado según petición: sólo quedan las funcionalidades visibles -->
                         </div>
                     </div> <!-- /.collapse -->
                 </div>
@@ -89,7 +94,6 @@
             </div>
         </main>
 
-        <!-- Mejor pie de página consistente y ligero -->
         <footer class="bg-white border-top mt-5">
             <div class="container py-4">
                 <div class="row gy-3">

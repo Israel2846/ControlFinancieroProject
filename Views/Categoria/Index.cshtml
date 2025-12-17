@@ -1,100 +1,180 @@
 ﻿@model IEnumerable<ControlFinancieroProject.Models.Categoria>
 @using ControlFinancieroProject.Models
+@using System.Linq
 
 @{
     ViewData["Title"] = "Categorías";
+
+    var categorias = Model ?? Enumerable.Empty<Categoria>();
+    var total = categorias.Count();
+    var ingresos = categorias.Count(c => c.Tipo == TipoCategoria.Ingreso);
+    var gastos = categorias.Count(c => c.Tipo == TipoCategoria.Gasto);
 }
+<section class="py-4">
+    <div class="container">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-start gap-3 mb-4">
+            <div>
+                <h1 class="h4 mb-1">@ViewData["Title"]</h1>
+                <div class="small text-muted">Gestiona las categorías usadas para clasificar tus transacciones.</div>
+            </div>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h4 text-dark mb-0">@ViewData["Title"]</h1>
+            <div class="d-flex gap-2 align-items-center">
+                <div class="me-2 d-none d-md-flex align-items-center gap-3">
+                    <div class="text-center">
+                        <div class="small text-muted">Total</div>
+                        <div class="fw-semibold">@total</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="small text-muted">Ingresos</div>
+                        <div class="text-success fw-semibold">@ingresos</div>
+                    </div>
+                    <div class="text-center">
+                        <div class="small text-muted">Gastos</div>
+                        <div class="text-danger fw-semibold">@gastos</div>
+                    </div>
+                </div>
 
-    <div class="d-flex gap-2 align-items-center">
-        <input id="searchInput" class="form-control form-control-sm" style="min-width:220px" placeholder="Buscar categorías..." aria-label="Buscar categorías" />
-        <a asp-action="Create" class="btn btn-sm btn-primary d-inline-flex align-items-center">
-            <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Nueva
-        </a>
-    </div>
-</div>
+                <!-- Nuevo buscador: input + limpiar + contador -->
+                <div class="input-group input-group-sm me-2 shadow-sm rounded">
+                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                    <input id="searchInput" class="form-control form-control-sm" placeholder="Buscar categorías (nombre) ..." aria-label="Buscar categorías" />
+                    <button id="clearSearch" class="btn btn-sm btn-outline-secondary" type="button" title="Limpiar búsqueda">✕</button>
+                    <span id="searchCount" class="input-group-text bg-white d-none">0</span>
+                </div>
 
-@if (!Model.Any())
-{
-    <div class="card border-0 shadow-sm">
-        <div class="card-body text-center text-muted py-5">
-            <i class="bi bi-folder2-open fs-3 mb-2" aria-hidden="true"></i>
-            <div class="fw-semibold">Aún no hay categorías</div>
-            <div class="small">Crea tu primera categoría para empezar a clasificar transacciones.</div>
-            <div class="mt-3">
-                <a asp-action="Create" class="btn btn-sm btn-outline-primary">Crear categoría</a>
+                <a asp-action="Create" class="btn btn-sm btn-primary d-inline-flex align-items-center shadow-sm">
+                    <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Nueva
+                </a>
             </div>
         </div>
-    </div>
-}
-else
-{
-    <div class="row g-3">
-        @foreach (var categoria in Model)
+
+        @if (!categorias.Any())
         {
-            <div class="col-12 col-md-6 col-lg-4">
-                <div class="card h-100 shadow-sm border-0">
-                    <div class="card-body d-flex flex-column">
-                        <div class="d-flex align-items-start justify-content-between mb-2">
-                            <div>
-                                <h5 class="card-title mb-1 text-truncate" style="max-width:220px">@categoria.Descripcion</h5>
-                                <div class="text-muted small">ID: @categoria.Id</div>
-                            </div>
-
-                            <div class="text-end ms-2">
-                                @if (categoria.Tipo == TipoCategoria.Ingreso)
-                                {
-                                    <span class="badge border border-success text-success rounded-pill" style="background-color: rgba(25,135,84,0.06);">
-                                        <i class="bi bi-arrow-up-short me-1"></i>Ingreso
-                                    </span>
-                                }
-                                else
-                                {
-                                    <span class="badge border border-danger text-danger rounded-pill" style="background-color: rgba(220,53,69,0.06);">
-                                        <i class="bi bi-arrow-down-short me-1"></i>Gasto
-                                    </span>
-                                }
-                            </div>
-                        </div>
-
-                        <p class="card-text text-muted small mb-3">@((string.IsNullOrWhiteSpace(categoria.Descripcion) ? "-" : categoria.Descripcion))</p>
-
-                        <div class="mt-auto d-flex gap-2">
-                            <a asp-action="Details" asp-route-id="@categoria.Id" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
-                                <i class="bi bi-eye me-1"></i><span class="d-none d-sm-inline">Ver</span>
-                            </a>
-                            <a asp-action="Edit" asp-route-id="@categoria.Id" class="btn btn-sm btn-outline-warning d-inline-flex align-items-center">
-                                <i class="bi bi-pencil me-1"></i><span class="d-none d-sm-inline">Editar</span>
-                            </a>
-                            <a asp-action="Delete" asp-route-id="@categoria.Id" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center">
-                                <i class="bi bi-trash me-1"></i><span class="d-none d-sm-inline">Eliminar</span>
-                            </a>
-                        </div>
-                    </div>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-folder2-open display-6 text-muted mb-2"></i>
+                    <h5 class="fw-semibold mb-1">Aún no hay categorías</h5>
+                    <p class="text-muted mb-3">Crea tu primera categoría para empezar a clasificar transacciones.</p>
+                    <a asp-action="Create" class="btn btn-outline-primary">Crear categoría</a>
                 </div>
             </div>
         }
+        else
+        {
+            <div class="row g-3" id="categoriesGrid">
+                @foreach (var categoria in categorias)
+                {
+                    var tipoIsIngreso = categoria.Tipo == TipoCategoria.Ingreso;
+                    var badgeClass = tipoIsIngreso ? "bg-success text-white" : "bg-danger text-white";
+                    var icon = tipoIsIngreso ? "bi-arrow-up-short" : "bi-arrow-down-short";
+                    <div class="col-12 col-md-6 col-lg-4 category-card" data-search="@((categoria.Descripcion ?? string.Empty).ToLowerInvariant())">
+                        <div class="card h-100 shadow-sm border-0 hover-scale">
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex align-items-start justify-content-between mb-2">
+                                    <div class="me-2" style="min-width:0;">
+                                        <h5 class="card-title mb-1 text-truncate category-title" style="max-width:220px">@categoria.Descripcion</h5>
+                                        <div class="text-muted small category-desc">@((string.IsNullOrWhiteSpace(categoria.Descripcion) ? "-" : categoria.Descripcion))</div>
+                                        <div class="text-muted small">ID: @categoria.Id</div>
+                                    </div>
+
+                                    <div class="text-end ms-2">
+                                        <span class="badge rounded-pill @badgeClass d-inline-flex align-items-center gap-1">
+                                            <i class="bi @icon"></i>
+                                            @(tipoIsIngreso ? "Ingreso" : "Gasto")
+                                        </span>
+                                    </div>
+                                </div>
+
+                                <div class="mt-auto d-flex gap-2">
+                                    <a asp-action="Details" asp-route-id="@categoria.Id" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center">
+                                        <i class="bi bi-eye me-1"></i><span class="d-none d-sm-inline">Ver</span>
+                                    </a>
+                                    <a asp-action="Edit" asp-route-id="@categoria.Id" class="btn btn-sm btn-outline-warning d-inline-flex align-items-center">
+                                        <i class="bi bi-pencil me-1"></i><span class="d-none d-sm-inline">Editar</span>
+                                    </a>
+                                    <form asp-action="Delete" asp-route-id="@categoria.Id" method="post" class="d-inline" onsubmit="return confirm('¿Eliminar categoría? Esta acción no eliminará transacciones asociadas.')">
+                                        @Html.AntiForgeryToken()
+                                        <button type="submit" class="btn btn-sm btn-outline-danger d-inline-flex align-items-center">
+                                            <i class="bi bi-trash me-1"></i><span class="d-none d-sm-inline">Eliminar</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+
     </div>
-}
+</section>
+
+<style>
+    /* mejoras visuales locales */
+    .hover-scale:hover { transform: translateY(-6px); box-shadow: 0 10px 28px rgba(0,0,0,0.08) !important; transition: all .16s ease; }
+    .input-group .form-control { min-width: 220px; }
+    mark.cat-match { background: rgba(13,110,253,0.15); padding:0 .15rem; border-radius:.15rem; }
+</style>
 
 @section Scripts {
     <script>
         (function () {
             const input = document.getElementById('searchInput');
+            const clearBtn = document.getElementById('clearSearch');
+            const countEl = document.getElementById('searchCount');
             if (!input) return;
+
+            const cards = Array.from(document.querySelectorAll('.category-card'));
+
+            function escapeRegExp(string) {
+                return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            }
+
+            function applyFilter(q) {
+                const term = q.trim().toLowerCase();
+                let visible = 0;
+
+                cards.forEach(card => {
+                    const titleEl = card.querySelector('.category-title');
+                    const descEl = card.querySelector('.category-desc');
+                    const rawTitle = titleEl ? titleEl.textContent || '' : '';
+                    const rawDesc = descEl ? descEl.textContent || '' : '';
+                    const hay = (rawTitle + ' ' + rawDesc).toLowerCase().includes(term);
+
+                    // mostrar/ocultar
+                    card.style.display = term === '' || hay ? '' : 'none';
+                    if (hay) visible++;
+
+                    // resaltar coincidencia en el título (sin romper HTML)
+                    if (titleEl) {
+                        if (term === '') {
+                            titleEl.innerHTML = rawTitle;
+                        } else {
+                            const re = new RegExp(escapeRegExp(term), 'ig');
+                            titleEl.innerHTML = rawTitle.replace(re, match => `<mark class="cat-match">${match}</mark>`);
+                        }
+                    }
+                });
+
+                // contador y visibilidad
+                if (term === '') {
+                    countEl.classList.add('d-none');
+                } else {
+                    countEl.classList.remove('d-none');
+                    countEl.textContent = visible;
+                }
+            }
 
             let timer;
             input.addEventListener('input', function () {
                 clearTimeout(timer);
-                const q = this.value.trim().toLowerCase();
-                timer = setTimeout(() => {
-                    document.querySelectorAll('.card.h-100').forEach(function (card) {
-                        const text = card.innerText.toLowerCase();
-                        card.parentElement.style.display = q === '' || text.indexOf(q) !== -1 ? '' : 'none';
-                    });
-                }, 200);
+                timer = setTimeout(() => applyFilter(this.value), 180);
+            });
+
+            clearBtn.addEventListener('click', function () {
+                input.value = '';
+                input.focus();
+                applyFilter('');
             });
         })();
     </script>

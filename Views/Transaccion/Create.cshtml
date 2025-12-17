@@ -1,0 +1,143 @@
+@model ControlFinancieroProject.Models.Transaccion
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using ControlFinancieroProject.Models
+@using System.Linq
+
+@{
+    ViewData["Title"] = "Crear transacción";
+    var categorias = ViewData["Categorias"] as IEnumerable<Categoria> ?? Enumerable.Empty<Categoria>();
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">Transacciones</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Crear</li>
+    </ol>
+</nav>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <h4 class="card-title mb-3"><i class="bi bi-journal-plus me-2" aria-hidden="true"></i>Crear transacción</h4>
+
+        <form asp-action="Create" method="post" novalidate>
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none" role="alert"></div>
+
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label asp-for="Fecha" class="form-label">Fecha</label>
+                    <input asp-for="Fecha" class="form-control" type="date" />
+                    <span asp-validation-for="Fecha" class="text-danger"></span>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label asp-for="Monto" class="form-label">Monto</label>
+                    <input asp-for="Monto" class="form-control" step="0.01" inputmode="decimal" />
+                    <span asp-validation-for="Monto" class="text-danger"></span>
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="Descripcion" class="form-label">Descripción</label>
+                    <textarea asp-for="Descripcion" class="form-control" rows="3" maxlength="500" placeholder="Obligatorio"></textarea>
+                    <div class="form-text">Máx. 500 caracteres.</div>
+                    <span asp-validation-for="Descripcion" class="text-danger"></span>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label class="form-label">Tipo</label>
+                    <select id="TipoSelect" class="form-select" aria-label="Tipo de transacción">
+                        <option value="">-- Selecciona tipo --</option>
+                        @foreach (var t in Enum.GetValues(typeof(TipoCategoria)).Cast<TipoCategoria>())
+                        {
+                            <option value="@((int)t)">@t.ToString()</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label asp-for="CategoriaId" class="form-label">Categoría</label>
+                    <select id="CategoriaId" name="CategoriaId" class="form-select">
+                        <option value="">-- Selecciona categoría --</option>
+                        @foreach (var c in categorias)
+                        {
+                            <option value="@c.Id" data-tipo="@((int)c.Tipo)">@c.Descripcion</option>
+                        }
+                    </select>
+                    <span asp-validation-for="CategoriaId" class="text-danger"></span>
+                </div>
+
+                <div class="col-12 d-flex align-items-end justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-outline-secondary d-inline-flex align-items-center">
+                        <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Volver
+                    </a>
+
+                    <button type="submit" class="btn btn-primary d-inline-flex align-items-center">
+                        <i class="bi bi-save me-1" aria-hidden="true"></i>Guardar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const tipo = document.getElementById('TipoSelect');
+            const categoria = document.getElementById('CategoriaId');
+
+            function filterCategorias() {
+                const selectedTipo = tipo.value;
+                let anyVisible = false;
+                Array.from(categoria.options).forEach(opt => {
+                    if (!opt.dataset.tipo) return; // placeholder
+                    if (selectedTipo === "" || opt.dataset.tipo === selectedTipo) {
+                        opt.style.display = '';
+                        anyVisible = true;
+                    } else {
+                        opt.style.display = 'none';
+                        // si la opción actualmente seleccionada queda oculta, limpiar selección
+                        if (categoria.value === opt.value) {
+                            categoria.value = '';
+                        }
+                    }
+                });
+                // si no hay categorías del tipo seleccionado, puedes mostrar un mensaje (opcional)
+            }
+
+            if (tipo && categoria) {
+                // inicializar si hay una categoría seleccionada (por re-render en validación)
+                const initialCat = categoria.value;
+                if (initialCat) {
+                    const selOpt = categoria.querySelector('option[value="' + initialCat + '"]');
+                    if (selOpt && selOpt.dataset.tipo) {
+                        tipo.value = selOpt.dataset.tipo;
+                    }
+                }
+                filterCategorias();
+                tipo.addEventListener('change', filterCategorias, { passive: true });
+            }
+
+            // validación form summary (existente)
+            const form = document.querySelector('form[asp-action="Create"]');
+            if (!form) return;
+            form.addEventListener('submit', function () {
+                setTimeout(() => {
+                    const summary = document.querySelector('div[asp-validation-summary="ModelOnly"]');
+                    const raw = Array.from(document.querySelectorAll('.text-danger, .input-validation-error'));
+                    const errors = raw.filter(el => el && el.textContent && el.textContent.trim().length > 0);
+                    if (summary) {
+                        if (errors.length > 0) {
+                            summary.classList.remove('d-none');
+                            summary.textContent = 'Corrige los errores en el formulario antes de continuar.';
+                        } else {
+                            summary.classList.add('d-none');
+                        }
+                    }
+                }, 10);
+            }, { passive: true });
+        })();
+    </script>
+}
