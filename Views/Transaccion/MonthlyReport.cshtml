@@ -88,6 +88,7 @@
                         <div style="max-height:260px;">
                             <canvas id="pieExpenses" style="width:100%;height:260px;"></canvas>
                         </div>
+                        <div class="small text-muted mt-2">Haz clic en una porción para ver las transacciones</div>
                     </div>
                 </div>
             </div>
@@ -99,6 +100,7 @@
                         <div style="max-height:260px;">
                             <canvas id="pieIncomes" style="width:100%;height:260px;"></canvas>
                         </div>
+                        <div class="small text-muted mt-2">Haz clic en una porción para ver las transacciones</div>
                     </div>
                 </div>
             </div>
@@ -164,6 +166,32 @@
     </div>
 </div>
 
+<!-- Modal para mostrar transacciones filtradas por categoría -->
+<div class="modal fade" id="categoryTxModal" tabindex="-1" aria-labelledby="categoryTxModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="categoryTxModalLabel">Transacciones</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+            </div>
+            <div class="modal-body">
+                <div id="categoryTxSummary" class="mb-2 small text-muted"></div>
+                <div class="table-responsive">
+                    <table class="table table-sm">
+                        <thead class="small text-muted">
+                            <tr><th>Fecha</th><th>Descripción</th><th class="text-end">Monto</th><th>Tipo</th></tr>
+                        </thead>
+                        <tbody id="categoryTxBody"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
@@ -181,13 +209,23 @@
             const totalIncome = Number(@Model.TotalIncome);
             const totalExpense = Number(@Model.TotalExpense);
 
+            // Serializar transacciones del mes para filtrado cliente
+            const transacciones = @Html.Raw(JsonSerializer.Serialize(Model.Transacciones.Select(t => new {
+                Id = t.Id,
+                Fecha = t.Fecha.ToString("yyyy-MM-dd"),
+                Descripcion = t.Descripcion,
+                Monto = t.Monto,
+                Categoria = t.Categoria != null ? t.Categoria.Descripcion : null,
+                Tipo = t.Categoria != null ? t.Categoria.Tipo.ToString() : null
+            })));
+
             function fmt(v) {
                 return v.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
 
             // LINE - gastos por día
             const ctxLine = document.getElementById('lineExpenses').getContext('2d');
-            new Chart(ctxLine, {
+            const lineChart = new Chart(ctxLine, {
                 type: 'line',
                 data: {
                     labels: dailyLabels,
@@ -220,23 +258,23 @@
 
             // PIE - gastos por categoría
             const ctxPieE = document.getElementById('pieExpenses').getContext('2d');
-            new Chart(ctxPieE, {
+            const pieExpensesChart = new Chart(ctxPieE, {
                 type: 'pie',
                 data: { labels: expenseLabels, datasets: [{ data: expenseValues, backgroundColor: generateColors(expenseValues.length) }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${fmt(ctx.parsed)} ` } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${fmt(ctx.parsed)}` } } } }
             });
 
             // PIE - ingresos por categoría
             const ctxPieI = document.getElementById('pieIncomes').getContext('2d');
-            new Chart(ctxPieI, {
+            const pieIncomesChart = new Chart(ctxPieI, {
                 type: 'pie',
                 data: { labels: incomeLabels, datasets: [{ data: incomeValues, backgroundColor: generateColors(incomeValues.length) }] },
-                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${fmt(ctx.parsed)} ` } } } }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${fmt(ctx.parsed)}` } } } }
             });
 
-            // DOUGHNUT - Ingreso vs Gasto (más pequeño y centrado)
+            // DOUGHNUT - Ingreso vs Gasto
             const ctxD = document.getElementById('doughnutNet').getContext('2d');
-            new Chart(ctxD, {
+            const doughnutChart = new Chart(ctxD, {
                 type: 'doughnut',
                 data: { labels: ['Ingresos', 'Gastos'], datasets: [{ data: [totalIncome, totalExpense], backgroundColor: ['#198754', '#dc3545'] }] },
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${fmt(ctx.parsed)}` } } } }
@@ -246,6 +284,58 @@
                 const base = ['#0d6efd','#6610f2','#6f42c1','#d63384','#dc3545','#fd7e14','#ffc107','#198754','#20c997','#0dcaf0','#6c757d'];
                 return Array.from({length: n}).map((_, i) => base[i % base.length]);
             }
+
+            // Modal utilities
+            const categoryModalEl = document.getElementById('categoryTxModal');
+            const categoryModal = new bootstrap.Modal(categoryModalEl);
+            const categoryTxBody = document.getElementById('categoryTxBody');
+            const categoryTxTitle = document.getElementById('categoryTxModalLabel');
+            const categoryTxSummary = document.getElementById('categoryTxSummary');
+
+            function openCategoryModal(categoryLabel, typeLabel) {
+                const rows = transacciones
+                    .filter(t => (t.Categoria || '') === categoryLabel)
+                    .sort((a,b) => b.Fecha.localeCompare(a.Fecha)); // más recientes arriba
+
+                categoryTxTitle.textContent = `${categoryLabel} — Transacciones (${rows.length})`;
+                categoryTxSummary.textContent = typeLabel ? `Tipo: ${typeLabel}` : '';
+
+                categoryTxBody.innerHTML = rows.map(t => {
+                    const tipoBadge = t.Tipo === 'Ingreso' ? '<span class="badge bg-success">Ingreso</span>' : (t.Tipo === 'Gasto' ? '<span class="badge bg-danger">Gasto</span>' : '<span class="badge bg-secondary">-</span>');
+                    return `<tr>
+                        <td class="small">${t.Fecha}</td>
+                        <td class="small">${escapeHtml(t.Descripcion || '')}</td>
+                        <td class="text-end small">${fmt(Number(t.Monto) || 0)}</td>
+                        <td class="small text-end">${tipoBadge}</td>
+                    </tr>`;
+                }).join('');
+
+                categoryModal.show();
+            }
+
+            // escapeHtml seguro
+            function escapeHtml(str) {
+                const div = document.createElement('div');
+                div.appendChild(document.createTextNode(String(str)));
+                return div.innerHTML;
+            }
+
+            // Attach click handlers: obtener segmento clicado y abrir modal
+            document.getElementById('pieExpenses').onclick = function(evt) {
+                const points = pieExpensesChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true });
+                if (!points.length) return;
+                const idx = points[0].index;
+                const label = pieExpensesChart.data.labels[idx];
+                openCategoryModal(label, 'Gasto');
+            };
+
+            document.getElementById('pieIncomes').onclick = function(evt) {
+                const points = pieIncomesChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true });
+                if (!points.length) return;
+                const idx = points[0].index;
+                const label = pieIncomesChart.data.labels[idx];
+                openCategoryModal(label, 'Ingreso');
+            };
         })();
     </script>
 }
