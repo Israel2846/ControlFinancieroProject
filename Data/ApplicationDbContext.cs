@@ -21,6 +21,14 @@ namespace ControlFinancieroProject.Data
                 .HasPrecision(18, 2);
 
             modelBuilder.Entity<Transaccion>()
+                .Property(t => t.SaldoAnterior)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Transaccion>()
+                .Property(t => t.SaldoNuevo)
+                .HasPrecision(18, 2);
+
+            modelBuilder.Entity<Transaccion>()
                 .HasOne(t => t.Categoria)
                 .WithMany(c => c.Transacciones)
                 .HasForeignKey(t => t.CategoriaId)

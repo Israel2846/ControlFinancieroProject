@@ -1,0 +1,152 @@
+@model ControlFinancieroProject.Models.Transaccion
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewData["Title"] = "Editar transacción";
+    // Asegúrate de que 'categorias' esté disponible en la vista.
+    // Si el controlador pasa las categorías por ViewBag:
+    var categorias = ViewBag.Categorias as IEnumerable<ControlFinancieroProject.Models.Categoria>;
+}
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a asp-action="Index">Transacciones</a></li>
+        <li class="breadcrumb-item active" aria-current="page">Editar</li>
+    </ol>
+</nav>
+
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+            <div>
+                <h4 class="card-title mb-0"><i class="bi bi-pencil-square me-2" aria-hidden="true"></i>Editar transacción</h4>
+                <small class="text-muted">Id: <span class="fw-semibold">@Model.Id</span></small>
+            </div>
+            <!-- Botón 'Volver' superior eliminado (redundante con el footer) -->
+        </div>
+
+        <hr />
+
+        <form asp-action="Edit" asp-route-id="@Model.Id" method="post" novalidate>
+            @Html.AntiForgeryToken()
+
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger d-none" role="alert"></div>
+
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <label asp-for="Fecha" class="form-label">Fecha</label>
+                    <input asp-for="Fecha" class="form-control" type="date" />
+                    <span asp-validation-for="Fecha" class="text-danger"></span>
+                </div>
+
+                <div class="col-12 col-md-6">
+                    <label asp-for="Monto" class="form-label">Monto</label>
+                    <input asp-for="Monto" class="form-control" step="0.01" inputmode="decimal" />
+                    <span asp-validation-for="Monto" class="text-danger"></span>
+                </div>
+
+                <div class="col-12">
+                    <label asp-for="Descripcion" class="form-label">Descripción</label>
+                    <textarea asp-for="Descripcion" class="form-control" rows="3" maxlength="500" placeholder="Opcional"></textarea>
+                    <div class="form-text">Máx. 500 caracteres.</div>
+                    <span asp-validation-for="Descripcion" class="text-danger"></span>
+                </div>
+
+                <div class="col-sm-6">
+                    <label class="form-label">Tipo</label>
+                    <select id="TipoSelect" class="form-select" aria-label="Tipo de transacción">
+                        <option value="">-- Selecciona tipo --</option>
+                        @foreach (var t in Enum.GetValues(typeof(TipoCategoria)).Cast<TipoCategoria>())
+                        {
+                            <option value="@((int)t)">@t.ToString()</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="col-sm-6">
+                    <label asp-for="CategoriaId" class="form-label">Categoría</label>
+                    <select id="CategoriaId" name="CategoriaId" class="form-select">
+                        <option value="">-- Selecciona categoría --</option>
+                        @if (categorias != null)
+                        {
+                            foreach (var c in categorias)
+                            {
+                                // Construir la opción como cadena para evitar C# dentro de atributos del tag helper
+                                var selectedPart = c.Id == Model.CategoriaId ? " selected" : "";
+                                var optionHtml = "<option value=\"" + c.Id + "\" data-tipo=\"" + ((int)c.Tipo) + "\"" + selectedPart + ">" + System.Text.Encodings.Web.HtmlEncoder.Default.Encode(c.Descripcion) + "</option>";
+                                @Html.Raw(optionHtml)
+                            }
+                        }
+                    </select>
+                    <span asp-validation-for="CategoriaId" class="text-danger"></span>
+                </div>
+
+                <!-- Botones: alineación igual que en Create.cshtml -->
+                <div class="col-12 d-flex align-items-end justify-content-end gap-2">
+                    <a asp-action="Index" class="btn btn-outline-secondary d-inline-flex align-items-center">
+                        <i class="bi bi-arrow-left me-1" aria-hidden="true"></i>Volver
+                    </a>
+
+                    <button type="submit" class="btn btn-primary d-inline-flex align-items-center">
+                        <i class="bi bi-save me-1" aria-hidden="true"></i>Guardar
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const tipo = document.getElementById('TipoSelect');
+            const categoria = document.getElementById('CategoriaId');
+
+            function filterCategorias() {
+                const selectedTipo = tipo.value;
+                Array.from(categoria.options).forEach(opt => {
+                    if (!opt.dataset.tipo) return;
+                    if (selectedTipo === "" || opt.dataset.tipo === selectedTipo) {
+                        opt.style.display = '';
+                    } else {
+                        opt.style.display = 'none';
+                        if (categoria.value === opt.value) {
+                            categoria.value = '';
+                        }
+                    }
+                });
+            }
+
+            if (tipo && categoria) {
+                // preseleccionar tipo según la categoría actual (si aplica)
+                const initialCat = categoria.value;
+                if (initialCat) {
+                    const selOpt = categoria.querySelector('option[value="' + initialCat + '"]');
+                    if (selOpt && selOpt.dataset.tipo) {
+                        tipo.value = selOpt.dataset.tipo;
+                    }
+                }
+                filterCategorias();
+                tipo.addEventListener('change', filterCategorias, { passive: true });
+            }
+
+            // validación form summary
+            const form = document.querySelector('form[asp-action="Edit"]');
+            const summary = document.querySelector('div[asp-validation-summary="ModelOnly"]');
+            if (form && summary) {
+                form.addEventListener('submit', function () {
+                    setTimeout(() => {
+                        const errors = document.querySelectorAll('.input-validation-error, .validation-summary-errors li, .text-danger:not(:empty)');
+                        if (errors.length > 0) {
+                            summary.classList.remove('d-none');
+                            summary.textContent = 'Corrige los errores antes de continuar.';
+                        } else {
+                            summary.classList.add('d-none');
+                        }
+                    }, 10);
+                }, { passive: true });
+            }
+        })();
+    </script>
+}
