@@ -18,8 +18,25 @@
                 <div class="small text-muted">Gestiona las categorías usadas para clasificar tus transacciones.</div>
             </div>
 
-            <div class="d-flex gap-2 align-items-center">
-                <div class="me-2 d-none d-md-flex align-items-center gap-3">
+            <div class="d-flex gap-2 align-items-center w-100 flex-wrap">
+                <!-- Totales: versión móvil (visible < md) -->
+                <div class="d-flex d-md-none gap-2 align-items-center order-1 w-100">
+                    <div class="text-center small flex-fill">
+                        <div class="small text-muted">Total</div>
+                        <div class="fw-semibold">@total</div>
+                    </div>
+                    <div class="text-center small flex-fill">
+                        <div class="small text-muted">Ingresos</div>
+                        <div class="text-success fw-semibold">@ingresos</div>
+                    </div>
+                    <div class="text-center small flex-fill">
+                        <div class="small text-muted">Gastos</div>
+                        <div class="text-danger fw-semibold">@gastos</div>
+                    </div>
+                </div>
+
+                <!-- Totales: versión escritorio (visible >= md) -->
+                <div class="me-2 d-none d-md-flex align-items-center gap-3 order-2">
                     <div class="text-center">
                         <div class="small text-muted">Total</div>
                         <div class="fw-semibold">@total</div>
@@ -35,16 +52,20 @@
                 </div>
 
                 <!-- Nuevo buscador: input + limpiar + contador -->
-                <div class="input-group input-group-sm me-2 shadow-sm rounded">
-                    <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
-                    <input id="searchInput" class="form-control form-control-sm" placeholder="Buscar categorías (nombre) ..." aria-label="Buscar categorías" />
-                    <button id="clearSearch" class="btn btn-sm btn-outline-secondary" type="button" title="Limpiar búsqueda">✕</button>
-                    <span id="searchCount" class="input-group-text bg-white d-none">0</span>
+                <div class="flex-fill order-3">
+                    <div class="input-group input-group-sm shadow-sm rounded w-100">
+                        <span class="input-group-text bg-white"><i class="bi bi-search"></i></span>
+                        <input id="searchInput" class="form-control form-control-sm" placeholder="Buscar categorías (nombre) ..." aria-label="Buscar categorías" />
+                        <button id="clearSearch" class="btn btn-sm btn-outline-secondary" type="button" title="Limpiar búsqueda">✕</button>
+                        <span id="searchCount" class="input-group-text bg-white d-none">0</span>
+                    </div>
                 </div>
 
-                <a asp-action="Create" class="btn btn-sm btn-primary d-inline-flex align-items-center shadow-sm">
-                    <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Nueva
-                </a>
+                <div class="order-4">
+                    <a asp-action="Create" class="btn btn-sm btn-primary d-inline-flex align-items-center shadow-sm">
+                        <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Nueva
+                    </a>
+                </div>
             </div>
         </div>
 
@@ -108,13 +129,6 @@
 
     </div>
 </section>
-
-<style>
-    /* mejoras visuales locales */
-    .hover-scale:hover { transform: translateY(-6px); box-shadow: 0 10px 28px rgba(0,0,0,0.08) !important; transition: all .16s ease; }
-    .input-group .form-control { min-width: 220px; }
-    mark.cat-match { background: rgba(13,110,253,0.15); padding:0 .15rem; border-radius:.15rem; }
-</style>
 
 @section Scripts {
     <script>

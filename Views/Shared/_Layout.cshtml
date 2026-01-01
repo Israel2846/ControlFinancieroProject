@@ -40,6 +40,7 @@
                                 <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">
                                     <i class="bi bi-house-door me-1" aria-hidden="true"></i>
                                     <span class="d-none d-md-inline">Inicio</span>
+                                    <span class="d-md-none ms-1">Inicio</span>
                                 </a>
                             </li>
 
@@ -47,16 +48,19 @@
                                 <a class="nav-link text-dark" asp-controller="Transaccion" asp-action="Index">
                                     <i class="bi bi-list-check me-1" aria-hidden="true"></i>
                                     <span class="d-none d-md-inline">Transacciones</span>
+                                    <span class="d-md-none ms-1">Transacciones</span>
                                 </a>
                             </li>
 
-                            <li class="nav-item d-none d-lg-block">
+                            <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Categoria" asp-action="Index">
-                                    <i class="bi bi-tags me-1" aria-hidden="true"></i> Categorías
+                                    <i class="bi bi-tags me-1" aria-hidden="true"></i>
+                                    <span class="d-none d-md-inline">Categorías</span>
+                                    <span class="d-md-none ms-1">Categorías</span>
                                 </a>
                             </li>
 
-                            <li class="nav-item dropdown d-none d-lg-block">
+                            <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle text-dark" href="#" id="reportsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     <i class="bi bi-bar-chart-line me-1" aria-hidden="true"></i> Informes
                                 </a>
@@ -88,6 +92,7 @@
                             <a class="btn btn-primary btn-sm d-inline-flex align-items-center" asp-controller="Transaccion" asp-action="Create" title="Nueva transacción">
                                 <i class="bi bi-plus-lg me-2" aria-hidden="true"></i>
                                 <span class="d-none d-md-inline">Nueva transacción</span>
+                                <span class="d-md-none">Nueva</span>
                             </a>
 
                             <!-- Dropdown eliminado según petición: sólo quedan las funcionalidades visibles -->

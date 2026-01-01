@@ -75,7 +75,8 @@
             <div class="card-body">
                 <h6 class="card-title mb-3">Gastos por día</h6>
                 <div style="max-height:320px;">
-                    <canvas id="lineExpenses" style="width:100%;height:320px;"></canvas>
+                    <!-- Cambiado a gráfica de barras para mostrar mejor comparación por día -->
+                    <canvas id="barExpenses" style="width:100%;height:320px;"></canvas>
                 </div>
             </div>
         </div>
@@ -223,20 +224,19 @@
                 return v.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
 
-            // LINE - gastos por día
-            const ctxLine = document.getElementById('lineExpenses').getContext('2d');
-            const lineChart = new Chart(ctxLine, {
-                type: 'line',
+            // BARS - gastos por día (mejor comparación por día)
+            const ctxBar = document.getElementById('barExpenses').getContext('2d');
+            const barChart = new Chart(ctxBar, {
+                type: 'bar',
                 data: {
                     labels: dailyLabels,
                     datasets: [{
                         label: 'Gasto diario',
                         data: dailyExpenses,
+                        backgroundColor: 'rgba(220,53,69,0.85)',
                         borderColor: 'rgba(220,53,69,0.95)',
-                        backgroundColor: 'rgba(220,53,69,0.12)',
-                        fill: true,
-                        tension: 0.3,
-                        pointRadius: 3
+                        borderWidth: 1,
+                        maxBarThickness: 40
                     }]
                 },
                 options: {
@@ -251,7 +251,7 @@
                     },
                     plugins: {
                         legend: { display: false },
-                        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${fmt(ctx.parsed.y)}` } }
+                        tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: ${fmt(ctx.parsed.y ?? ctx.parsed)}` } }
                     }
                 }
             });

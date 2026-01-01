@@ -27,17 +27,27 @@
 }
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h4 mb-0">Comparativo</h1>
-    <form class="d-flex" method="get" asp-action="Comparative">
-        <input type="number" name="year1" value="@Model.Year1" min="2000" class="form-control form-control-sm me-1" style="width:90px" />
-        <input type="number" name="month1" value="@Model.Month1" min="1" max="12" class="form-control form-control-sm me-2" style="width:70px" />
 
-        <span class="mx-1 fw-semibold">vs</span>
+    <!-- Form responsive: en pantallas pequeñas los inputs se apilan para evitar overflow horizontal -->
+    <form class="d-flex flex-column flex-sm-row align-items-center gap-2" method="get" asp-action="Comparative">
+        <div class="d-flex gap-1 align-items-center" style="min-width:0">
+            <input type="number" name="year1" value="@Model.Year1" min="2000" class="form-control form-control-sm" style="width:90px;min-width:60px" />
+            <input type="number" name="month1" value="@Model.Month1" min="1" max="12" class="form-control form-control-sm" style="width:70px;min-width:60px" />
+        </div>
 
-        <input type="number" name="year2" value="@Model.Year2" min="2000" class="form-control form-control-sm mx-2" style="width:90px" />
-        <input type="number" name="month2" value="@Model.Month2" min="1" max="12" class="form-control form-control-sm me-2" style="width:70px" />
+        <div class="d-flex align-items-center">
+            <span class="mx-1 fw-semibold">vs</span>
+        </div>
 
-        <button class="btn btn-sm btn-primary me-2">Comparar</button>
-        <a class="btn btn-sm btn-outline-secondary" asp-action="Comparative" title="Restablecer">Reset</a>
+        <div class="d-flex gap-1 align-items-center" style="min-width:0">
+            <input type="number" name="year2" value="@Model.Year2" min="2000" class="form-control form-control-sm" style="width:90px;min-width:60px" />
+            <input type="number" name="month2" value="@Model.Month2" min="1" max="12" class="form-control form-control-sm" style="width:70px;min-width:60px" />
+        </div>
+
+        <div class="d-flex gap-2 ms-sm-2">
+            <button class="btn btn-sm btn-primary">Comparar</button>
+            <a class="btn btn-sm btn-outline-secondary" asp-action="Comparative" title="Restablecer">Reset</a>
+        </div>
     </form>
 </div>
 
