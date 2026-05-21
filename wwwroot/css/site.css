@@ -123,3 +123,26 @@ mark.cat-match {
   border-radius: var(--bs-border-radius);
   box-shadow: 0 .25rem .75rem rgba(0,0,0,.1);
 }
+
+/* Stat cards */
+.stat-card { border-top: 3px solid transparent; }
+.stat-card--success { border-top-color: var(--bs-success); }
+.stat-card--danger  { border-top-color: var(--bs-danger); }
+.stat-card--primary { border-top-color: var(--bs-primary); }
+.stat-card--neutral { border-top-color: var(--bs-secondary); }
+
+.stat-card__icon {
+  width: 2.4rem;
+  height: 2.4rem;
+  border-radius: .6rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+/* Transaction cards: colored left border */
+.tx-card { border-left: 3px solid transparent !important; }
+.tx-card--ingreso { border-left-color: var(--bs-success) !important; }
+.tx-card--gasto   { border-left-color: var(--bs-danger) !important; }

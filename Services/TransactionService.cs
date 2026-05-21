@@ -280,7 +280,8 @@ namespace ControlFinancieroProject.Services
         {
             return await _context.Categoria
                 .AsNoTracking()
-                .OrderBy(c => c.Descripcion)
+                .OrderBy(c => c.Tipo)
+                .ThenBy(c => c.Descripcion)
                 .Select(c => new CategoryOptionViewModel
                 {
                     Id = c.Id,
