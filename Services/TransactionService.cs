@@ -21,21 +21,70 @@ namespace ControlFinancieroProject.Services
             _logger = logger;
         }
 
-        public async Task<TransactionIndexViewModel> GetIndexViewModelAsync(string? date, string? searchTerm)
+        public async Task<TransactionIndexViewModel> GetIndexViewModelAsync(
+            DateTime? fromDate,
+            DateTime? toDate,
+            string? searchTerm,
+            TipoCategoria? tipo,
+            int[]? categoryIds)
         {
-            var selectedDate = ParseDateOrToday(date);
-            var start = selectedDate.Date;
-            var end = start.AddDays(1);
+            var selectedCategoryIds = NormalizeCategoryIds(categoryIds);
+            var normalizedSearch = NormalizeSearchTerm(searchTerm);
+            var hasNonDateFilters = !string.IsNullOrWhiteSpace(normalizedSearch) || tipo.HasValue || selectedCategoryIds.Count > 0;
+
+            if (!fromDate.HasValue && !toDate.HasValue && !hasNonDateFilters)
+            {
+                fromDate = DateTime.Today;
+                toDate = DateTime.Today;
+            }
+
+            var model = new TransactionIndexViewModel
+            {
+                SearchTerm = normalizedSearch,
+                FromDate = fromDate?.Date,
+                ToDate = toDate?.Date,
+                SelectedTipo = tipo,
+                SelectedCategoryIds = selectedCategoryIds,
+                Categorias = await GetCategoryOptionsAsync()
+            };
+
+            if (fromDate.HasValue && toDate.HasValue && fromDate.Value.Date > toDate.Value.Date)
+            {
+                model.FilterErrorMessage = "La fecha inicial no puede ser mayor que la fecha final.";
+                return model;
+            }
 
             var query = _context.Transaccion
                 .AsNoTracking()
                 .Include(t => t.Categoria)
-                .Where(t => t.Fecha >= start && t.Fecha < end);
+                .AsQueryable();
 
-            if (!string.IsNullOrWhiteSpace(searchTerm))
+            if (model.FromDate.HasValue)
             {
-                var normalizedSearch = searchTerm.Trim();
-                query = query.Where(t => EF.Functions.Like(t.Descripcion, $"%{normalizedSearch}%"));
+                query = query.Where(t => t.Fecha >= model.FromDate.Value);
+            }
+
+            if (model.ToDate.HasValue)
+            {
+                var endExclusive = model.ToDate.Value.AddDays(1);
+                query = query.Where(t => t.Fecha < endExclusive);
+            }
+
+            if (!string.IsNullOrWhiteSpace(model.SearchTerm))
+            {
+                query = query.Where(t =>
+                    EF.Functions.Like(t.Descripcion, $"%{model.SearchTerm}%") ||
+                    (t.Categoria != null && EF.Functions.Like(t.Categoria.Descripcion, $"%{model.SearchTerm}%")));
+            }
+
+            if (model.SelectedTipo.HasValue)
+            {
+                query = query.Where(t => t.Categoria != null && t.Categoria.Tipo == model.SelectedTipo.Value);
+            }
+
+            if (model.SelectedCategoryIds.Count > 0)
+            {
+                query = query.Where(t => model.SelectedCategoryIds.Contains(t.CategoriaId));
             }
 
             var transacciones = await query
@@ -43,18 +92,15 @@ namespace ControlFinancieroProject.Services
                 .ThenByDescending(t => t.Id)
                 .ToListAsync();
 
-            return new TransactionIndexViewModel
-            {
-                SelectedDate = selectedDate,
-                SearchTerm = searchTerm,
-                Transacciones = transacciones,
-                DailyIncome = transacciones
-                    .Where(t => t.Categoria?.Tipo == TipoCategoria.Ingreso)
-                    .Sum(t => t.Monto),
-                DailyExpense = transacciones
-                    .Where(t => t.Categoria?.Tipo == TipoCategoria.Gasto)
-                    .Sum(t => t.Monto)
-            };
+            model.Transacciones = transacciones;
+            model.FilteredIncome = transacciones
+                .Where(t => t.Categoria?.Tipo == TipoCategoria.Ingreso)
+                .Sum(t => t.Monto);
+            model.FilteredExpense = transacciones
+                .Where(t => t.Categoria?.Tipo == TipoCategoria.Gasto)
+                .Sum(t => t.Monto);
+
+            return model;
         }
 
         public async Task<Transaccion?> GetByIdAsync(int id)
@@ -102,17 +148,7 @@ namespace ControlFinancieroProject.Services
 
         public async Task PopulateFormOptionsAsync(TransactionFormViewModel model)
         {
-            var categorias = await _context.Categoria
-                .AsNoTracking()
-                .OrderBy(c => c.Descripcion)
-                .Select(c => new CategoryOptionViewModel
-                {
-                    Id = c.Id,
-                    Descripcion = c.Descripcion,
-                    Tipo = c.Tipo
-                })
-                .ToListAsync();
-
+            var categorias = await GetCategoryOptionsAsync();
             model.Categorias = categorias;
 
             if (model.CategoriaId > 0)
@@ -240,16 +276,34 @@ namespace ControlFinancieroProject.Services
             return _balanceService.RecalculateFromAsync(DateTime.MinValue, null);
         }
 
-        private static DateTime ParseDateOrToday(string? rawDate)
+        private async Task<IReadOnlyList<CategoryOptionViewModel>> GetCategoryOptionsAsync()
         {
-            return DateTime.TryParseExact(
-                rawDate,
-                "yyyy-MM-dd",
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.None,
-                out var selectedDate)
-                ? selectedDate
-                : DateTime.Today;
+            return await _context.Categoria
+                .AsNoTracking()
+                .OrderBy(c => c.Descripcion)
+                .Select(c => new CategoryOptionViewModel
+                {
+                    Id = c.Id,
+                    Descripcion = c.Descripcion,
+                    Tipo = c.Tipo
+                })
+                .ToListAsync();
+        }
+
+        private static string? NormalizeSearchTerm(string? searchTerm)
+        {
+            return string.IsNullOrWhiteSpace(searchTerm)
+                ? null
+                : searchTerm.Trim();
+        }
+
+        private static IReadOnlyList<int> NormalizeCategoryIds(int[]? categoryIds)
+        {
+            return categoryIds?
+                .Where(id => id > 0)
+                .Distinct()
+                .OrderBy(id => id)
+                .ToArray() ?? Array.Empty<int>();
         }
 
         private static (DateTime Fecha, int Id) GetEarlierPosition(

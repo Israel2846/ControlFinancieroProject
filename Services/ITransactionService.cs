@@ -4,7 +4,12 @@ namespace ControlFinancieroProject.Services
 {
     public interface ITransactionService
     {
-        Task<TransactionIndexViewModel> GetIndexViewModelAsync(string? date, string? searchTerm);
+        Task<TransactionIndexViewModel> GetIndexViewModelAsync(
+            DateTime? fromDate,
+            DateTime? toDate,
+            string? searchTerm,
+            TipoCategoria? tipo,
+            int[]? categoryIds);
 
         Task<Transaccion?> GetByIdAsync(int id);
 

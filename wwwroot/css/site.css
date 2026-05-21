@@ -108,3 +108,18 @@ mark.cat-match {
   padding: 0 .15rem;
   border-radius: .15rem;
 }
+
+/* Tom Select: slight border-radius adjustment to match Bootstrap */
+.ts-wrapper.form-select {
+  padding: 0;
+}
+
+.ts-control {
+  border-radius: var(--bs-border-radius) !important;
+  min-height: calc(2.25rem + 2px);
+}
+
+.ts-dropdown {
+  border-radius: var(--bs-border-radius);
+  box-shadow: 0 .25rem .75rem rgba(0,0,0,.1);
+}

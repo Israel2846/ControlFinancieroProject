@@ -17,9 +17,14 @@ namespace ControlFinancieroProject.Controllers
             _transactionReportService = transactionReportService;
         }
 
-        public async Task<IActionResult> Index(string date, string q)
+        public async Task<IActionResult> Index(
+            DateTime? fromDate,
+            DateTime? toDate,
+            string? q,
+            TipoCategoria? tipo,
+            int[]? categoryIds)
         {
-            var model = await _transactionService.GetIndexViewModelAsync(date, q);
+            var model = await _transactionService.GetIndexViewModelAsync(fromDate, toDate, q, tipo, categoryIds);
             return View(model);
         }
 
