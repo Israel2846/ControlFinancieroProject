@@ -41,10 +41,10 @@
                     </div>
 
                     <div class="flex-fill">
-                        <div class="small text-muted mb-1">Relación ingreso / gasto</div>
+                        <div class="small text-muted mb-1">Relaci&oacute;n ingreso / gasto</div>
                         <div class="progress" style="height:12px;">
                             @{
-                                // Calcular totales y porcentajes usando decimal para evitar conversiones erróneas
+                                // Calcular totales y porcentajes usando decimal para evitar conversiones erroneas
                                 var total = Math.Max(Model.TotalIncome + Model.TotalExpense, 1.0m);
                                 var incomePctDec = (Model.TotalIncome / total) * 100m;
                                 var expensePctDec = (Model.TotalExpense / total) * 100m;
@@ -56,7 +56,7 @@
                             <div class="progress-bar bg-danger" role="progressbar" style="width:@(expensePct)%" aria-valuenow="@(expensePct)"
                                 aria-valuemin="0" aria-valuemax="100"></div>
                         </div>
-                        <div class="small text-muted mt-1">@Math.Round(incomePct,1)% ingresos • @Math.Round(expensePct,1)% gastos
+                        <div class="small text-muted mt-1">@Math.Round(incomePct,1)% ingresos / @Math.Round(expensePct,1)% gastos
                         </div>
                     </div>
 
@@ -73,9 +73,9 @@
     <div class="col-12 col-lg-8">
         <div class="card mb-3 shadow-sm">
             <div class="card-body">
-                <h6 class="card-title mb-3">Gastos por día</h6>
+                <h6 class="card-title mb-3">Gastos por d&iacute;a</h6>
                 <div style="max-height:320px;">
-                    <!-- Cambiado a gráfica de barras para mostrar mejor comparación por día -->
+                    <!-- Cambiado a grafica de barras para mostrar mejor comparacion por dia -->
                     <canvas id="barExpenses" style="width:100%;height:320px;"></canvas>
                 </div>
             </div>
@@ -85,11 +85,11 @@
             <div class="col-12 col-md-6">
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <h6 class="card-title">Gastos por categoría</h6>
+                        <h6 class="card-title">Gastos por categor&iacute;a</h6>
                         <div style="max-height:260px;">
                             <canvas id="pieExpenses" style="width:100%;height:260px;"></canvas>
                         </div>
-                        <div class="small text-muted mt-2">Haz clic en una porción para ver las transacciones</div>
+                        <div class="small text-muted mt-2">Haz clic en una porci&oacute;n para ver las transacciones</div>
                     </div>
                 </div>
             </div>
@@ -97,11 +97,11 @@
             <div class="col-12 col-md-6">
                 <div class="card shadow-sm">
                     <div class="card-body">
-                        <h6 class="card-title">Ingresos por categoría</h6>
+                        <h6 class="card-title">Ingresos por categor&iacute;a</h6>
                         <div style="max-height:260px;">
                             <canvas id="pieIncomes" style="width:100%;height:260px;"></canvas>
                         </div>
-                        <div class="small text-muted mt-2">Haz clic en una porción para ver las transacciones</div>
+                        <div class="small text-muted mt-2">Haz clic en una porci&oacute;n para ver las transacciones</div>
                     </div>
                 </div>
             </div>
@@ -125,13 +125,13 @@
 
         <div class="card shadow-sm">
             <div class="card-body">
-                <h6 class="card-title">Transacciones (@Model.Transacciones.Count())</h6>
+                <h6 class="card-title">Transacciones (@Model.Transacciones.Count)</h6>
                 <div class="table-responsive" style="max-height:360px; overflow:auto">
                     <table class="table table-sm mb-0">
                         <thead class="small text-muted">
                             <tr>
                                 <th>Fecha</th>
-                                <th>Descripción</th>
+                                <th>Descripci&oacute;n</th>
                                 <th class="text-end">Monto</th>
                                 <th>Tipo</th>
                             </tr>
@@ -167,7 +167,7 @@
     </div>
 </div>
 
-<!-- Modal para mostrar transacciones filtradas por categoría -->
+<!-- Modal para mostrar transacciones filtradas por categoria -->
 <div class="modal fade" id="categoryTxModal" tabindex="-1" aria-labelledby="categoryTxModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-scrollable">
         <div class="modal-content">
@@ -180,7 +180,7 @@
                 <div class="table-responsive">
                     <table class="table table-sm">
                         <thead class="small text-muted">
-                            <tr><th>Fecha</th><th>Descripción</th><th class="text-end">Monto</th><th>Tipo</th></tr>
+                            <tr><th>Fecha</th><th>Descripci&oacute;n</th><th class="text-end">Monto</th><th>Tipo</th></tr>
                         </thead>
                         <tbody id="categoryTxBody"></tbody>
                     </table>
@@ -224,7 +224,7 @@
                 return v.toLocaleString('es-ES', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             }
 
-            // BARS - gastos por día (mejor comparación por día)
+            // BARS - gastos por dia (mejor comparacion por dia)
             const ctxBar = document.getElementById('barExpenses').getContext('2d');
             const barChart = new Chart(ctxBar, {
                 type: 'bar',
@@ -256,7 +256,7 @@
                 }
             });
 
-            // PIE - gastos por categoría
+            // PIE - gastos por categoria
             const ctxPieE = document.getElementById('pieExpenses').getContext('2d');
             const pieExpensesChart = new Chart(ctxPieE, {
                 type: 'pie',
@@ -264,7 +264,7 @@
                 options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' }, tooltip: { callbacks: { label: (ctx) => `${ctx.label}: ${fmt(ctx.parsed)}` } } } }
             });
 
-            // PIE - ingresos por categoría
+            // PIE - ingresos por categoria
             const ctxPieI = document.getElementById('pieIncomes').getContext('2d');
             const pieIncomesChart = new Chart(ctxPieI, {
                 type: 'pie',
@@ -295,9 +295,9 @@
             function openCategoryModal(categoryLabel, typeLabel) {
                 const rows = transacciones
                     .filter(t => (t.Categoria || '') === categoryLabel)
-                    .sort((a,b) => b.Fecha.localeCompare(a.Fecha)); // más recientes arriba
+                    .sort((a,b) => b.Fecha.localeCompare(a.Fecha)); // mas recientes arriba
 
-                categoryTxTitle.textContent = `${categoryLabel} — Transacciones (${rows.length})`;
+                categoryTxTitle.textContent = `${categoryLabel} - Transacciones (${rows.length})`;
                 categoryTxSummary.textContent = typeLabel ? `Tipo: ${typeLabel}` : '';
 
                 categoryTxBody.innerHTML = rows.map(t => {

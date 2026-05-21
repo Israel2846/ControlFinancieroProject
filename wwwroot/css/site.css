@@ -32,7 +32,7 @@ body {
 
 /* Estilos personalizados globales */
 
-/* Navbar móvil: mostrar icono + texto y adaptar acciones */
+/* Navbar mÃ³vil: mostrar icono + texto y adaptar acciones */
 @media (max-width: 767.98px) {
   .navbar-collapse .navbar-nav .nav-link {
     display: flex !important;
@@ -82,7 +82,7 @@ body {
   box-shadow: 0 6px 18px rgba(0,0,0,0.06) !important;
 }
 
-/* Protecciones contra overflow móvil para tarjetas genéricas */
+/* Protecciones contra overflow mÃ³vil para tarjetas genÃ©ricas */
 @media (max-width: 575.98px) {
   .tx-card .card-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tx-card .card-body { min-height: 0; }
@@ -91,7 +91,7 @@ body {
 
 /* Reglas trasladadas desde vistas para evitar estilos inline */
 
-/* Evitar que el input obligue scroll horizontal en móvil y ajustar títulos */
+/* Evitar que el input obligue scroll horizontal en mÃ³vil y ajustar tÃ­tulos */
 @media (max-width: 767.98px) {
   .input-group .form-control { min-width: 0; }
   .category-title { max-width: 140px; }

@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace ControlFinancieroProject.Models
 {
     public class ComparativeReportViewModel
@@ -15,12 +13,12 @@ namespace ControlFinancieroProject.Models
         public List<decimal> ValuesMonth1 { get; set; } = new List<decimal>();
         public List<decimal> ValuesMonth2 { get; set; } = new List<decimal>();
 
-        // Específicos: gastos
+        // EspecÃ­ficos: gastos
         public List<string> ExpenseCategoryLabels { get; set; } = new List<string>();
         public List<decimal> ExpenseValuesMonth1 { get; set; } = new List<decimal>();
         public List<decimal> ExpenseValuesMonth2 { get; set; } = new List<decimal>();
 
-        // Específicos: ingresos
+        // EspecÃ­ficos: ingresos
         public List<string> IncomeCategoryLabels { get; set; } = new List<string>();
         public List<decimal> IncomeValuesMonth1 { get; set; } = new List<decimal>();
         public List<decimal> IncomeValuesMonth2 { get; set; } = new List<decimal>();
@@ -28,7 +26,7 @@ namespace ControlFinancieroProject.Models
         public decimal TotalMonth1 { get; set; }
         public decimal TotalMonth2 { get; set; }
 
-        public IEnumerable<Transaccion> TransaccionesMonth1 { get; set; } = new List<Transaccion>();
-        public IEnumerable<Transaccion> TransaccionesMonth2 { get; set; } = new List<Transaccion>();
+        public IReadOnlyList<Transaccion> TransaccionesMonth1 { get; set; } = Array.Empty<Transaccion>();
+        public IReadOnlyList<Transaccion> TransaccionesMonth2 { get; set; } = Array.Empty<Transaccion>();
     }
 }

@@ -1,0 +1,60 @@
+<script>
+    (function () {
+        const tipo = document.getElementById('TipoSelect');
+        const categoria = document.getElementById('CategoriaId');
+        const summary = document.querySelector('div[asp-validation-summary="ModelOnly"]');
+        const form = document.querySelector('form');
+
+        function syncSelectedTypeFromCategory() {
+            const selectedOption = categoria?.selectedOptions?.[0];
+            if (tipo && selectedOption?.dataset?.tipo) {
+                tipo.value = selectedOption.dataset.tipo;
+            }
+        }
+
+        function filterCategorias() {
+            if (!tipo || !categoria) {
+                return;
+            }
+
+            const selectedTipo = tipo.value;
+            Array.from(categoria.options).forEach(option => {
+                if (!option.dataset.tipo) {
+                    return;
+                }
+
+                const shouldDisplay = selectedTipo === '' || option.dataset.tipo === selectedTipo;
+                option.hidden = !shouldDisplay;
+
+                if (!shouldDisplay && categoria.value === option.value) {
+                    categoria.value = '';
+                }
+            });
+        }
+
+        if (tipo && categoria) {
+            syncSelectedTypeFromCategory();
+            filterCategorias();
+            tipo.addEventListener('change', filterCategorias, { passive: true });
+            categoria.addEventListener('change', syncSelectedTypeFromCategory, { passive: true });
+        }
+
+        if (!form || !summary) {
+            return;
+        }
+
+        form.addEventListener('submit', function () {
+            setTimeout(() => {
+                const errors = Array.from(document.querySelectorAll('.text-danger, .input-validation-error'))
+                    .filter(element => element.textContent && element.textContent.trim().length > 0);
+
+                if (errors.length > 0) {
+                    summary.classList.remove('d-none');
+                    summary.textContent = 'Corrige los errores antes de continuar.';
+                } else {
+                    summary.classList.add('d-none');
+                }
+            }, 10);
+        }, { passive: true });
+    })();
+</script>

@@ -1,4 +1,5 @@
 using ControlFinancieroProject.Data;
+using ControlFinancieroProject.Services;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 
@@ -13,6 +14,10 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ITransactionBalanceService, TransactionBalanceService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
+builder.Services.AddScoped<ITransactionReportService, TransactionReportService>();
 
 // Configure Serilog
 Log.Logger = new LoggerConfiguration()

@@ -1,12 +1,12 @@
 @model ControlFinancieroProject.Models.Transaccion
 
 @{
-    ViewData["Title"] = "Eliminar Transacción";
+    ViewData["Title"] = "Eliminar TransacciÃ³n";
 }
 
 <h1>@ViewData["Title"]</h1>
 
-<h4>¿Desea eliminar esta transacción?</h4>
+<h4>Â¿Desea eliminar esta transacciÃ³n?</h4>
 <div>
     <dl class="row">
         <dt class="col-sm-3">Fecha</dt>
@@ -15,10 +15,10 @@
         <dt class="col-sm-3">Monto</dt>
         <dd class="col-sm-9">@Model.Monto.ToString("N2")</dd>
 
-        <dt class="col-sm-3">Descripción</dt>
+        <dt class="col-sm-3">DescripciÃ³n</dt>
         <dd class="col-sm-9">@Model.Descripcion</dd>
 
-        <dt class="col-sm-3">Categoría</dt>
+        <dt class="col-sm-3">CategorÃ­a</dt>
         <dd class="col-sm-9">@Model.Categoria?.Descripcion</dd>
     </dl>
 </div>

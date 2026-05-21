@@ -2,12 +2,12 @@
 @using ControlFinancieroProject.Models
 
 @{
-    ViewData["Title"] = "Editar categoría";
+    ViewData["Title"] = "Editar categorÃ­a";
 }
 
 <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a asp-action="Index">Categorías</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">CategorÃ­as</a></li>
         <li class="breadcrumb-item active" aria-current="page">Editar</li>
     </ol>
 </nav>
@@ -16,7 +16,7 @@
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-start mb-3">
             <div>
-                <h4 class="card-title mb-0"><i class="bi bi-pencil-square me-2" aria-hidden="true"></i>Editar categoría</h4>
+                <h4 class="card-title mb-0"><i class="bi bi-pencil-square me-2" aria-hidden="true"></i>Editar categorÃ­a</h4>
                 <small class="text-muted">Id: <span class="fw-semibold">@Model.Id</span></small>
             </div>
             <div class="btn-group" role="group" aria-label="Acciones">
@@ -37,7 +37,7 @@
                 <div class="col-12">
                     <label asp-for="Descripcion" class="form-label">Nombre</label>
                     <input asp-for="Descripcion" class="form-control" maxlength="100" placeholder="Ej. Salario, Comida, Transporte" autofocus />
-                    <div class="form-text">Máx. 100 caracteres.</div>
+                    <div class="form-text">MÃ¡x. 100 caracteres.</div>
                     <span asp-validation-for="Descripcion" class="text-danger"></span>
                 </div>
 
@@ -66,7 +66,7 @@
     <partial name="_ValidationScriptsPartial" />
     <script>
         (function () {
-            // Mostrar resumen si hay errores tras validación unobtrusive
+            // Mostrar resumen si hay errores tras validaciÃ³n unobtrusive
             const form = document.querySelector('form[asp-action="Edit"]');
             const summary = document.querySelector('div[asp-validation-summary="ModelOnly"]');
             if (!form || !summary) return;

@@ -2,12 +2,12 @@
 @using ControlFinancieroProject.Models
 
 @{
-    ViewData["Title"] = "Eliminar categoría";
+    ViewData["Title"] = "Eliminar categorÃ­a";
 }
 
 <nav aria-label="breadcrumb" class="mb-3">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a asp-action="Index">Categorías</a></li>
+        <li class="breadcrumb-item"><a asp-action="Index">CategorÃ­as</a></li>
         <li class="breadcrumb-item active" aria-current="page">Eliminar</li>
     </ol>
 </nav>
@@ -16,17 +16,17 @@
     <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
         <div class="d-flex align-items-center">
             <i class="bi bi-exclamation-triangle-fill me-2" aria-hidden="true"></i>
-            <strong>Confirmar eliminación</strong>
+            <strong>Confirmar eliminaciÃ³n</strong>
         </div>
         <small class="text-muted">Id: @Model.Id</small>
     </div>
 
     <div class="card-body">
-        <p class="mb-3">¿Deseas eliminar la categoría <strong class="text-danger">@Model.Descripcion</strong>?</p>
+        <p class="mb-3">Â¿Deseas eliminar la categorÃ­a <strong class="text-danger">@Model.Descripcion</strong>?</p>
 
         <div class="row g-3 mb-3">
             <div class="col-md-6">
-                <h6 class="text-uppercase text-muted small mb-1">Descripción</h6>
+                <h6 class="text-uppercase text-muted small mb-1">DescripciÃ³n</h6>
                 <p class="mb-0">@Model.Descripcion</p>
             </div>
 
@@ -43,13 +43,13 @@
             </div>
 
             <div class="col-md-3">
-                <h6 class="text-uppercase text-muted small mb-1">Relación</h6>
+                <h6 class="text-uppercase text-muted small mb-1">RelaciÃ³n</h6>
                 <p class="mb-0 text-muted">Transacciones: <span class="fw-semibold">@(Model.Transacciones?.Count ?? 0)</span></p>
             </div>
         </div>
 
         <div class="alert alert-warning small">
-            Esta acción eliminará la categoría permanentemente. Si la categoría está asociada a transacciones, revisa antes sus registros.
+            Esta acciÃ³n eliminarÃ¡ la categorÃ­a permanentemente. Si la categorÃ­a estÃ¡ asociada a transacciones, revisa antes sus registros.
         </div>
 
         <form asp-action="Delete" method="post" class="d-flex gap-2">

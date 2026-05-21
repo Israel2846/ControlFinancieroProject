@@ -18,7 +18,7 @@
     var diffEntity = diff >= 0 ? "&uarr;" : "&darr;";
 
     // Porcentaje relativo: dividir por el valor absoluto del primer mes.
-    // Si el primer mes es 0 mostramos "—" (evita porcentajes engañosos).
+    // Si el primer mes es 0 mostramos "â€”" (evita porcentajes engaÃ±osos).
     decimal? diffPct = null;
     if (net1 != 0m)
     {
@@ -28,7 +28,7 @@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1 class="h4 mb-0">Comparativo</h1>
 
-    <!-- Form responsive: en pantallas pequeñas los inputs se apilan para evitar overflow horizontal -->
+    <!-- Form responsive: en pantallas pequeÃ±as los inputs se apilan para evitar overflow horizontal -->
     <form class="d-flex flex-column flex-sm-row align-items-center gap-2" method="get" asp-action="Comparative">
         <div class="d-flex gap-1 align-items-center" style="min-width:0">
             <input type="number" name="year1" value="@Model.Year1" min="2000" class="form-control form-control-sm" style="width:90px;min-width:60px" />
@@ -61,7 +61,7 @@
                     <div class="h5 mb-1">@net1.ToString("N2")</div>
                     <span class="badge @signClass1 ms-3">@signText1</span>
                 </div>
-                <div class="small text-muted">Transacciones: @Model.TransaccionesMonth1.Count()</div>
+                <div class="small text-muted">Transacciones: @(Model.TransaccionesMonth1?.Count ?? 0)</div>
             </div>
         </div>
     </div>
@@ -74,7 +74,7 @@
                     <div class="h5 mb-1">@net2.ToString("N2")</div>
                     <span class="badge @signClass2 ms-3">@signText2</span>
                 </div>
-                <div class="small text-muted">Transacciones: @Model.TransaccionesMonth2.Count()</div>
+                <div class="small text-muted">Transacciones: @(Model.TransaccionesMonth2?.Count ?? 0)</div>
             </div>
         </div>
     </div>
@@ -85,7 +85,7 @@
                 <div class="small text-muted">Diferencia</div>
                 <div class="h5 mb-1 @diffSign">@Html.Raw(diffEntity) @diff.ToString("N2")</div>
                 <div class="small text-muted">
-                    @(diffPct.HasValue ? $"{Math.Round(diffPct.Value, 1)}% respecto al primer mes" : "—")
+                    @(diffPct.HasValue ? $"{Math.Round(diffPct.Value, 1)}% respecto al primer mes" : "â€”")
                 </div>
             </div>
         </div>
@@ -97,7 +97,7 @@
         <div class="card shadow-sm mb-3">
             <div class="card-body d-flex flex-column">
                 <div class="d-flex justify-content-between align-items-center mb-2">
-                    <h6 class="card-title mb-0">Comparativo por categoría</h6>
+                    <h6 class="card-title mb-0">Comparativo por categorÃ­a</h6>
                     <div class="d-flex gap-2 align-items-center">
                         <label class="small text-muted mb-0">Top</label>
                         <select id="topN" class="form-select form-select-sm" style="width:80px">
@@ -117,12 +117,12 @@
 
         <div class="card shadow-sm">
             <div class="card-body">
-                <h6 class="card-title mb-3">Detalles por categoría (fila por categoría)</h6>
+                <h6 class="card-title mb-3">Detalles por categorÃ­a (fila por categorÃ­a)</h6>
                 <div class="table-responsive" style="max-height:340px; overflow:auto;">
                     <table class="table table-sm table-hover mb-0">
                         <thead class="small text-muted">
                             <tr>
-                                <th>Categoría</th>
+                                <th>CategorÃ­a</th>
                                 <th>Tipo</th>
                                 <th class="text-end">@Model.Month1/@Model.Year1</th>
                                 <th class="text-end">@Model.Month2/@Model.Year2</th>
@@ -139,7 +139,7 @@
         <div class="card shadow-sm mb-3">
             <div class="card-body">
                 <h6 class="card-title">Transacciones resumen</h6>
-                <div class="small text-muted mb-2">Últimos movimientos — selecciona la pestaña</div>
+                <div class="small text-muted mb-2">Ãšltimos movimientos â€” selecciona la pestaÃ±a</div>
 
                 <ul class="nav nav-tabs mb-2" id="transTabs" role="tablist">
                     <li class="nav-item" role="presentation">
@@ -160,7 +160,7 @@
                             <table class="table table-sm mb-0">
                                 <thead class="small text-muted"><tr><th>Fecha</th><th>Desc</th><th>Tipo</th><th class="text-end">Monto</th></tr></thead>
                                 <tbody>
-                                    @foreach(var t in Model.TransaccionesMonth1.OrderByDescending(t => t.Fecha).ThenByDescending(t => t.Id).Take(10))
+                                    @foreach(var t in (Model.TransaccionesMonth1 ?? Array.Empty<Transaccion>()).Take(10))
                                     {
                                         <tr>
                                             <td class="small">@t.Fecha.ToString("yyyy-MM-dd")</td>
@@ -188,7 +188,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="small text-muted mt-2">Últimas 10 transacciones del primer mes</div>
+                        <div class="small text-muted mt-2">Ãšltimas 10 transacciones del primer mes</div>
                     </div>
 
                     <div class="tab-pane fade" id="pane-month2" role="tabpanel" aria-labelledby="tab-month2">
@@ -196,7 +196,7 @@
                             <table class="table table-sm mb-0">
                                 <thead class="small text-muted"><tr><th>Fecha</th><th>Desc</th><th>Tipo</th><th class="text-end">Monto</th></tr></thead>
                                 <tbody>
-                                    @foreach(var t in Model.TransaccionesMonth2.OrderByDescending(t => t.Fecha).ThenByDescending(t => t.Id).Take(10))
+                                    @foreach(var t in (Model.TransaccionesMonth2 ?? Array.Empty<Transaccion>()).Take(10))
                                     {
                                         <tr>
                                             <td class="small">@t.Fecha.ToString("yyyy-MM-dd")</td>
@@ -224,7 +224,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        <div class="small text-muted mt-2">Últimas 10 transacciones del segundo mes</div>
+                        <div class="small text-muted mt-2">Ãšltimas 10 transacciones del segundo mes</div>
                     </div>
                 </div>
             </div>
@@ -236,7 +236,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         (function () {
-            // Datos del servidor (categorías generales)
+            // Datos del servidor (categorÃ­as generales)
             const labelsAll = @Html.Raw(JsonSerializer.Serialize(Model.CategoryLabels ?? new List<string>()));
             const vals1All = @Html.Raw(JsonSerializer.Serialize(Model.ValuesMonth1 ?? new List<decimal>()));
             const vals2All = @Html.Raw(JsonSerializer.Serialize(Model.ValuesMonth2 ?? new List<decimal>()));
@@ -267,7 +267,7 @@
                 const aS = slice.map(s => s.a);
                 const bS = slice.map(s => s.b);
 
-                // Poblar tabla: añadimos columna Tipo con texto y badge
+                // Poblar tabla: aÃ±adimos columna Tipo con texto y badge
                 const tbody = document.getElementById('categoryTableBody');
                 tbody.innerHTML = '';
                 slice.forEach(s => {

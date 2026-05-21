@@ -1,7 +1,7 @@
 @model ControlFinancieroProject.Models.Transaccion
 
 @{
-    ViewData["Title"] = "Detalles de Transacción";
+    ViewData["Title"] = "Detalles de TransacciÃ³n";
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -14,7 +14,7 @@
         <dt class="col-sm-3">Monto</dt>
         <dd class="col-sm-9">@Model.Monto.ToString("N2")</dd>
 
-        <dt class="col-sm-3">Descripción</dt>
+        <dt class="col-sm-3">DescripciÃ³n</dt>
         <dd class="col-sm-9">@Model.Descripcion</dd>
 
         <dt class="col-sm-3">Saldo Anterior</dt>
@@ -23,7 +23,7 @@
         <dt class="col-sm-3">Saldo Nuevo</dt>
         <dd class="col-sm-9">@Model.SaldoNuevo.ToString("N2")</dd>
 
-        <dt class="col-sm-3">Categoría</dt>
+        <dt class="col-sm-3">CategorÃ­a</dt>
         <dd class="col-sm-9">@Model.Categoria?.Descripcion</dd>
     </dl>
 </div>

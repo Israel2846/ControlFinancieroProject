@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using ControlFinancieroProject.Models;
-
 namespace ControlFinancieroProject.Models
 {
     public class MonthlyReportViewModel
@@ -8,7 +5,7 @@ namespace ControlFinancieroProject.Models
         public int Year { get; set; }
         public int Month { get; set; }
 
-        public IEnumerable<Transaccion> Transacciones { get; set; } = new List<Transaccion>();
+        public IReadOnlyList<Transaccion> Transacciones { get; set; } = Array.Empty<Transaccion>();
 
         public List<string> DailyLabels { get; set; } = new List<string>();
         public List<decimal> DailyExpenses { get; set; } = new List<decimal>();
