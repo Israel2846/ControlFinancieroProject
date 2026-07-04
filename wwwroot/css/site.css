@@ -124,7 +124,7 @@ mark.cat-match {
   box-shadow: 0 .25rem .75rem rgba(0,0,0,.1);
 }
 
-/* Stat cards */
+/* Tarjetas de resumen */
 .stat-card { border-top: 3px solid transparent; }
 .stat-card--success { border-top-color: var(--bs-success); }
 .stat-card--danger  { border-top-color: var(--bs-danger); }
