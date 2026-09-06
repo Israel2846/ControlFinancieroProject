@@ -146,3 +146,64 @@ mark.cat-match {
 .tx-card { border-left: 3px solid transparent !important; }
 .tx-card--ingreso { border-left-color: var(--bs-success) !important; }
 .tx-card--gasto   { border-left-color: var(--bs-danger) !important; }
+
+/* Dashboard financiero */
+.dashboard__eyebrow {
+  color: var(--bs-primary);
+  font-size: .75rem;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.dashboard-balance {
+  background: linear-gradient(135deg, #0d6efd, #084298);
+  color: #fff;
+  overflow: hidden;
+}
+
+.dashboard-balance__icon,
+.dashboard-transaction-icon {
+  align-items: center;
+  border-radius: 50%;
+  display: inline-flex;
+  flex-shrink: 0;
+  height: 3rem;
+  justify-content: center;
+  width: 3rem;
+}
+
+.dashboard-balance__icon {
+  background: rgba(255, 255, 255, .15);
+  font-size: 1.4rem;
+}
+
+.dashboard-balance__amount {
+  font-size: clamp(2rem, 5vw, 3.25rem);
+  font-weight: 700;
+  letter-spacing: -.04em;
+  line-height: 1;
+}
+
+.dashboard-balance__period {
+  border-left: 1px solid rgba(255, 255, 255, .25);
+  padding-left: 2rem;
+}
+
+.dashboard-transaction-icon {
+  height: 2.5rem;
+  width: 2.5rem;
+}
+
+.min-w-0 {
+  min-width: 0;
+}
+
+@media (max-width: 991.98px) {
+  .dashboard-balance__period {
+    border-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, .25);
+    padding-left: 0;
+    padding-top: 1.5rem;
+  }
+}

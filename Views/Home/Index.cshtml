@@ -1,110 +1,141 @@
-﻿@{
-    ViewData["Title"] = "Inicio - ControlFinanciero";
-    var now = DateTime.Now;
-    var year = now.Year;
-    var month = now.Month;
+﻿@model ControlFinancieroProject.Models.MonthlyReportViewModel
+@using ControlFinancieroProject.Models
+
+@{
+    ViewData["Title"] = "Inicio";
+    var periodDate = new DateTime(Model.Year, Model.Month, 1);
+    var periodBalance = Model.TotalIncome - Model.TotalExpense;
+    var isPositivePeriod = periodBalance >= 0;
+    var recentTransactions = Model.Transacciones.Take(5);
 }
-<div class="py-5 text-dark">
-    <div class="container">
-        <div class="row align-items-center gy-4">
-            <div class="col-lg-7">
-                <h1 class="display-5 fw-bold">ControlFinanciero</h1>
-                <p class="lead text-muted">Gestiona tus categorías y transacciones de forma simple y segura. Visualiza, crea y administra tus registros financieros rápidamente.</p>
 
-                <div class="d-flex flex-wrap gap-2 mt-3">
-                    <a asp-controller="Categoria" asp-action="Index" class="btn btn-primary btn-lg d-inline-flex align-items-center">
-                        <i class="bi bi-tags me-2" aria-hidden="true"></i> Categorías
-                    </a>
+<div class="dashboard py-4 py-lg-5">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+        <div>
+            <p class="dashboard__eyebrow mb-1">Resumen financiero</p>
+            <h1 class="h2 mb-1">Tu situación en @periodDate.ToString("MMMM yyyy")</h1>
+            <p class="text-muted mb-0">Una vista clara de tus movimientos y saldo disponible.</p>
+        </div>
+        <a asp-controller="Transaccion" asp-action="MonthlyReport" asp-route-year="@Model.Year" asp-route-month="@Model.Month"
+           class="btn btn-outline-primary d-inline-flex align-items-center align-self-start">
+            Ver reporte completo <i class="bi bi-arrow-up-right ms-2" aria-hidden="true"></i>
+        </a>
+    </div>
 
-                    <!-- Resumen del mes: acceso directo al reporte mensual -->
-                    <a asp-controller="Transaccion" asp-action="MonthlyReport" asp-route-year="@year" asp-route-month="@month"
-                       class="btn btn-outline-primary btn-lg d-inline-flex align-items-center">
-                        <i class="bi bi-calendar2-event me-2" aria-hidden="true"></i> Resumen del mes
-                    </a>
-
-                    <a asp-controller="Categoria" asp-action="Create" class="btn btn-sm btn-outline-secondary d-inline-flex align-items-center align-self-center">
-                        <i class="bi bi-plus-lg me-1" aria-hidden="true"></i> Nueva categoría
-                    </a>
+    <div class="dashboard-balance card border-0 shadow-sm mb-3">
+        <div class="card-body p-4 p-lg-5">
+            <div class="row align-items-center gy-4">
+                <div class="col-lg-7">
+                    <div class="d-flex align-items-center gap-3">
+                        <span class="dashboard-balance__icon"><i class="bi bi-wallet2" aria-hidden="true"></i></span>
+                        <div>
+                            <p class="text-white-50 text-uppercase small fw-semibold mb-1">Saldo actual</p>
+                            <p class="dashboard-balance__amount mb-0">@Model.CurrentBalance.ToString("N2")</p>
+                        </div>
+                    </div>
                 </div>
-
-                <p class="text-muted small mt-3 mb-0">Consejo: usa los enlaces de arriba para acceder rápidamente a informes y a la gestión de categorías.</p>
-            </div>
-
-            <div class="col-lg-5">
-                <div class="row g-3">
-                    <div class="col-12">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body">
-                                <h6 class="mb-1">Resumen rápido (acceso)</h6>
-                                <div class="d-flex gap-3 align-items-center">
-                                    <div class="small text-muted">Mes</div>
-                                    <div class="fw-semibold">@now.ToString("MMMM yyyy")</div>
-                                </div>
-
-                                <div class="mt-3 d-flex gap-2">
-                                    <a asp-controller="Transaccion" asp-action="MonthlyReport" asp-route-year="@year" asp-route-month="@month" class="btn btn-sm btn-outline-primary">
-                                        Ver reporte
-                                    </a>
-                                    <a asp-controller="Transaccion" asp-action="Comparative" class="btn btn-sm btn-outline-secondary">
-                                        Comparativo
-                                    </a>
-                                </div>
-
-                                <div class="mt-3 small text-muted">
-                                    Aquí tienes accesos directos a los informes principales. Para datos detallados abre el reporte mensual.
-                                </div>
-                            </div>
-                        </div>
+                <div class="col-lg-5">
+                    <div class="dashboard-balance__period">
+                        <p class="text-white-50 small mb-1">Balance del periodo</p>
+                        <p class="h3 mb-1">@($"{(isPositivePeriod ? "+" : string.Empty)}{periodBalance:N2}")</p>
+                        <span class="badge rounded-pill @(isPositivePeriod ? "text-bg-success" : "text-bg-danger")">
+                            <i class="bi @(isPositivePeriod ? "bi-arrow-up-right" : "bi-arrow-down-right") me-1" aria-hidden="true"></i>
+                            @(isPositivePeriod ? "Balance positivo" : "Balance negativo")
+                        </span>
                     </div>
-
-                    <div class="col-6">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="me-3 display-6 text-primary"><i class="bi bi-tags"></i></div>
-                                    <div>
-                                        <h6 class="mb-0">Categorías</h6>
-                                        <small class="text-muted">Administrar tipos</small>
-                                    </div>
-                                </div>
-                                <div class="mt-3">
-                                    <a asp-controller="Categoria" asp-action="Index" class="stretched-link text-decoration-none">Ver todas →</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-6">
-                        <div class="card shadow-sm h-100">
-                            <div class="card-body">
-                                <div class="d-flex align-items-center">
-                                    <div class="me-3 display-6 text-success"><i class="bi bi-list-check"></i></div>
-                                    <div>
-                                        <h6 class="mb-0">Transacciones</h6>
-                                        <small class="text-muted">Ingresos y gastos</small>
-                                    </div>
-                                </div>
-                                <div class="mt-3">
-                                    <a asp-controller="Transaccion" asp-action="Index" class="stretched-link text-decoration-none">Ver todas →</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="col-12">
-                        <div class="card border-0 bg-light small">
-                            <div class="card-body">
-                                <strong>Atajos rápidos</strong>
-                                <ul class="mb-0">
-                                    <li>Crear una nueva categoría: <a asp-controller="Categoria" asp-action="Create">Nueva categoría</a></li>
-                                    <li>Ir al resumen mensual: <a asp-controller="Transaccion" asp-action="MonthlyReport" asp-route-year="@year" asp-route-month="@month">Resumen del mes</a></li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
                 </div>
             </div>
-        </div><!-- row -->
-    </div><!-- container -->
+        </div>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-12 col-md-6">
+            <div class="card stat-card stat-card--success shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <span class="stat-card__icon bg-success-subtle text-success"><i class="bi bi-arrow-down-left-circle" aria-hidden="true"></i></span>
+                    <div>
+                        <p class="text-muted small mb-1">Ingresos del periodo</p>
+                        <p class="h4 mb-0 text-success">@Model.TotalIncome.ToString("N2")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6">
+            <div class="card stat-card stat-card--danger shadow-sm h-100">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <span class="stat-card__icon bg-danger-subtle text-danger"><i class="bi bi-arrow-up-right-circle" aria-hidden="true"></i></span>
+                    <div>
+                        <p class="text-muted small mb-1">Gastos del periodo</p>
+                        <p class="h4 mb-0 text-danger">@Model.TotalExpense.ToString("N2")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-sm h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center gap-3 mb-3">
+                        <div>
+                            <h2 class="h5 mb-1">Movimientos recientes</h2>
+                            <p class="text-muted small mb-0">Transacciones registradas este mes</p>
+                        </div>
+                        <span class="badge text-bg-light border text-dark">@Model.Transacciones.Count movimientos</span>
+                    </div>
+
+                    @if (Model.Transacciones.Count == 0)
+                    {
+                        <div class="dashboard-empty text-center py-4">
+                            <i class="bi bi-receipt text-muted fs-2" aria-hidden="true"></i>
+                            <p class="text-muted mb-0 mt-2">Aún no hay transacciones en este periodo.</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="list-group list-group-flush">
+                            @foreach (var transaction in recentTransactions)
+                            {
+                                var isIncome = transaction.Categoria?.Tipo == TipoCategoria.Ingreso;
+                                <div class="list-group-item px-0 py-3">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <span class="dashboard-transaction-icon @(isIncome ? "bg-success-subtle text-success" : "bg-danger-subtle text-danger")">
+                                            <i class="bi @(isIncome ? "bi-arrow-down-left" : "bi-arrow-up-right")" aria-hidden="true"></i>
+                                        </span>
+                                        <div class="flex-grow-1 min-w-0">
+                                            <p class="mb-0 fw-semibold text-truncate">@transaction.Descripcion</p>
+                                            <small class="text-muted">@transaction.Categoria?.Descripcion · @transaction.Fecha.ToString("dd MMM")</small>
+                                        </div>
+                                        <span class="fw-semibold text-nowrap @(isIncome ? "text-success" : "text-danger")">
+                                            @(isIncome ? "+" : "-")@transaction.Monto.ToString("N2")
+                                        </span>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-lg-4">
+            <div class="card dashboard-actions shadow-sm h-100">
+                <div class="card-body p-4">
+                    <h2 class="h5 mb-1">Acciones rápidas</h2>
+                    <p class="text-muted small mb-3">Mantén tus finanzas actualizadas.</p>
+                    <div class="d-grid gap-2">
+                        <a asp-controller="Transaccion" asp-action="Create" class="btn btn-primary">
+                            <i class="bi bi-plus-lg me-2" aria-hidden="true"></i>Nueva transacción
+                        </a>
+                        <a asp-controller="Transaccion" asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-list-check me-2" aria-hidden="true"></i>Ver transacciones
+                        </a>
+                        <a asp-controller="Categoria" asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="bi bi-tags me-2" aria-hidden="true"></i>Administrar categorías
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

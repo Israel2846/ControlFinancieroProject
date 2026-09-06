@@ -1,14 +1,23 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using ControlFinancieroProject.Models;
+using ControlFinancieroProject.Services;
 
 namespace ControlFinancieroProject.Controllers;
 
 public class HomeController : Controller
 {
-    public IActionResult Index()
+    private readonly ITransactionReportService _transactionReportService;
+
+    public HomeController(ITransactionReportService transactionReportService)
     {
-        return View();
+        _transactionReportService = transactionReportService;
+    }
+
+    public async Task<IActionResult> Index()
+    {
+        var model = await _transactionReportService.GetMonthlyReportAsync(null, null);
+        return View(model);
     }
 
     public IActionResult Privacy()
