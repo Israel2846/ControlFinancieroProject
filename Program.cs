@@ -6,7 +6,7 @@ using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.UseUrls("http://0.0.0.0:5035");
+builder.WebHost.UseUrls("http://localhost:5035;http://192.168.0.205:5035;https://localhost:5036;https://192.168.0.205:5036");
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
