@@ -78,6 +78,7 @@
                     <!-- Cambiado a grafica de barras para mostrar mejor comparacion por dia -->
                     <canvas id="barExpenses" style="width:100%;height:320px;"></canvas>
                 </div>
+                <div class="small text-muted mt-2">Haz clic en una barra para ver los gastos de ese d&iacute;a</div>
             </div>
         </div>
 
@@ -319,6 +320,39 @@
                 div.appendChild(document.createTextNode(String(str)));
                 return div.innerHTML;
             }
+
+            function openDayExpensesModal(date) {
+                const rows = transacciones
+                    .filter(t => t.Fecha === date && t.Tipo === 'Gasto')
+                    .sort((a, b) => (a.Descripcion || '').localeCompare(b.Descripcion || ''));
+
+                const total = rows.reduce((sum, t) => sum + (Number(t.Monto) || 0), 0);
+
+                categoryTxTitle.textContent = `Gastos del ${date} (${rows.length})`;
+                categoryTxSummary.textContent = rows.length
+                    ? `Total del d\u00eda: ${fmt(total)}`
+                    : 'No hay gastos registrados para este d\u00eda.';
+
+                categoryTxBody.innerHTML = rows.length
+                    ? rows.map(t => `<tr>
+                        <td class="small">${t.Fecha}</td>
+                        <td class="small">${escapeHtml(t.Descripcion || '')}</td>
+                        <td class="text-end small">${fmt(Number(t.Monto) || 0)}</td>
+                        <td class="small text-end"><span class="badge bg-danger">Gasto</span></td>
+                    </tr>`).join('')
+                    : '<tr><td colspan="4" class="text-center text-muted small">No hay gastos registrados para este d\u00eda.</td></tr>';
+
+                categoryModal.show();
+            }
+
+            // Click en una barra: identificar la fecha y mostrar el detalle de gastos de ese dia
+            document.getElementById('barExpenses').onclick = function(evt) {
+                const points = barChart.getElementsAtEventForMode(evt, 'nearest', { intersect: true });
+                if (!points.length) return;
+                const idx = points[0].index;
+                const date = dailyLabels[idx];
+                openDayExpensesModal(date);
+            };
 
             // Attach click handlers: obtener segmento clicado y abrir modal
             document.getElementById('pieExpenses').onclick = function(evt) {
